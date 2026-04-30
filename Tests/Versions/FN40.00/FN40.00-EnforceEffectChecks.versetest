@@ -1,0 +1,20 @@
+# Copyright Epic Games, Inc. All Rights Reserved.
+
+# Prior to 40.00, functions without result types (limited to functions where
+# all parameters are subtypes of `type` and result types are subtypes of `type`)
+# were not considered to have converges effect, but their invocation was allowed
+# in places that required no more than converges effect.  Allow all effects in
+# in prior versions to ensure existing islands continue to cook.
+
+assert_valid:
+    vpackage(P0,/P0,?Role := Source, ?Scope := PublicUser, ?UploadedAtFNVersion := 3960):
+        snippet:
+            A()<computes>:false = A()
+            B() := A()
+
+
+assert_semantic_error(3512):
+    vpackage(P0,/P0,?Role := Source, ?Scope := PublicUser, ?UploadedAtFNVersion := 4000):
+        snippet:
+            A()<computes>:false = A()
+            B() := A()

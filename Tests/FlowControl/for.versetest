@@ -2,16 +2,11 @@
 
 assert:
     List:[]int= for(X:=1 .. 3) { X }
-    3 = List.Length
-    1 = List[0]
-    2 = List[1]
-    3 = List[2]
+    List = array{1,2,3}
 
 assert: # range with type
     List:[]int= for(X:int=2 .. 3) { X } 
-    2 = List.Length
-    2 = List[0]
-    3 = List[1]
+    List = array{2,3}
 
 assert: # empty range
     List:[]int= for(X:=0 .. -1) { X } 
@@ -19,9 +14,7 @@ assert: # empty range
 
 assert:
     List:[]int= for(X:array{3, 2}) { X }
-    2 = List.Length
-    3 = List[0]
-    2 = List[1]
+    List = array{3,2}
 
 assert: # Empty array
     Empty:[]int= array{}
@@ -33,94 +26,47 @@ assert: # Define variable
 
 assert: # filter
     List:[]int= for(X:=1 .. 4, X<>3) { X }
-    3 = List.Length
-    1 = List[0]
-    2 = List[1]
-    4 = List[2]
+    List = array{1,2,4}
 
 assert: # Define variable that fails
     List:[]int= for(X:=-2 .. 2, X<>0, Y:=Floor(8/X)) { Y }
-    4 = List.Length
-    -4 = List[0]
-    -8 = List[1]
-    +8 = List[2]
-    +4 = List[3]
+    List = array{-4,-8,8,4}
    
 assert: # multiple filters, range
     FilteredList:[]int= for(X:=1 .. 4, X<>2, X<>3) { X }
-    2 = FilteredList.Length
-    1 = FilteredList[0]
-    4 = FilteredList[1]
+    FilteredList = array{1,4}
 
 assert: # multiple filters, array
     FilteredList:[]int= for(X:array{5, 2, 3, 0}, X<>2, X<>3) { X }
-    2 = FilteredList.Length
-    5 = FilteredList[0]
-    0 = FilteredList[1]
+    FilteredList = array{5,0}
 
 assert:
     FilteredList:[]int= for(X:=1 .. 5, X<>2, Y := 2*X, Y<10) { Y }
-    3 = FilteredList.Length
-    2 = FilteredList[0]
-    6 = FilteredList[1]
-    8 = FilteredList[2]
+    FilteredList = array{2,6,8}
 
 assert:
     FilteredList:[]int= for(X:array{5,4,3,2,1}, X<>2, Y := 2*X, Y<10) { Y }
-    3 = FilteredList.Length
-    8 = FilteredList[0]
-    6 = FilteredList[1]
-    2 = FilteredList[2]
+    FilteredList = array{8,6,2}
 
 assert: # range & range
     List:= for(X:=1 .. 3, Y:=1 .. 2) { X*10+Y }
-    List.Length = 6
-    11 = List[0]
-    12 = List[1]
-    21 = List[2]
-    22 = List[3]
-    31 = List[4]
-    32 = List[5]
+    List = array{11,12,21,22,31,32}
 
 assert: # array & range
     List:= for(X:array{10,20}, Y:=1 .. 3) { X+Y }
-    List.Length = 6
-    11 = List[0]
-    12 = List[1]
-    13 = List[2]
-    21 = List[3]
-    22 = List[4]
-    23 = List[5]
+    List = array{11,12,13,21,22,23}
 
 assert: # range & array
     List:= for(X:=1 .. 3, Y:array{10,20}) { X+Y }
-    List.Length = 6
-    11 = List[0]
-    21 = List[1]
-    12 = List[2]
-    22 = List[3]
-    13 = List[4]
-    23 = List[5]
+    List = array{11,21,12,22,13,23}
 
 assert: # array & array
     List:= for(X:array{10,20}, Y:array{1, 2, 3}) { X+Y }
-    List.Length = 6
-    11 = List[0]
-    12 = List[1]
-    13 = List[2]
-    21 = List[3]
-    22 = List[4]
-    23 = List[5]
+    List = array{11,12,13,21,22,23}
  
 assert: # range & local array variable
     List:= for(X:=1 .. 2, Y:=array{10+X,20+X}) { Y }
-    List.Length = 2
-    List[0].Length = 2
-    11 = List[0][0]
-    21 = List[0][1]
-    List[1].Length = 2
-    12 = List[1][0]
-    22 = List[1][1]
+    List = array{array{11,21}, array{12,22}}
     
 # This was in sol-1894, nice to check that it works
 SplitSort(AS:[]int):[]int=
@@ -143,27 +89,16 @@ assert:
     List:[]int= for(X:=1..5) { 10-X }
     SortedList:[]int=SplitSort(List)
 
-    SortedList.Length = List.Length
-    5 = SortedList[0]
-    6 = SortedList[1]
-    7 = SortedList[2]
-    8 = SortedList[3]
-    9 = SortedList[4]
+    SortedList = array{5,6,7,8,9}
 
 # Some more generic tests
 assert:
     List:[]int= for(X:=1..4, Y:=1..4, Z:=1..4, X=Y=Z, X<>3) { X+Y+Z }
-    List.Length = List.Length
-    3 = List[0]
-    6 = List[1]
-    12 = List[2]
+    List = array{3,6,12}
 
 assert:
     List:[]int= for(X:=1..4, X<>3, Y:=1..4, X=Y, Z:=1..4, X=Z) { X+Y+Z }
-    List.Length = List.Length
-    3 = List[0]
-    6 = List[1]
-    12 = List[2]
+    List = array{3,6,12}
     
 # Test for with iterating over empty arrays.
 assert:
@@ -232,7 +167,7 @@ assert_semantic_error(3588, 3532): # Redefine X as array
     Redefine :[]int= for(X:=1 .. 5, X :array{2, 3}) { X } 
 
 assert_semantic_error(3513): # Filter can not fail
-    NoFailure:[]int= for(X:=1 .. 4, 1) { X } 
+    NoFailure:[]int= for(X:=1 .. 4; 1) { X } 
 
 assert_semantic_error(3509): # Wrong type
     WrongType:[]int= for(X:float=1 .. 4) { X } 
@@ -418,3 +353,41 @@ assert:
                     set ch = NewCh
                     set log = log + array{ch}
     log = s_cycle
+
+# Brace-only for syntax tests
+
+assert: # for{X:C} simple iteration
+    List:[]int = for{X:array{1,2,3}}
+    List = array{1,2,3}
+
+assert: # for{I:=1..5} -> for(I:=1..5){I}
+    List:[]int = for{I:=1..5}
+    List = array{1,2,3,4,5}
+
+assert: # for{I->X:Xs} -> for(I->X:Xs){X}
+    List:[]int = for{I->X:array{10,20,30}}
+    List = array{10,20,30}
+
+assert: # for{X:C; X>0} -> expression as last, wrapped in binding
+    List:[]int = for{X:array{3, -1, 2, -5, 4}; X>0}
+    List = array{3,2,4}
+
+assert: # for{I->X:C; expr} -> expression as last, wrapped in binding
+    List:[]int = for{I->X:array{10,20,30}; I+X}
+    List = array{10,21,32}
+
+assert: # for{X:C; Z:=X+2; Z>0; Z} -> identifier as body, filter Z>0
+    List:[]int = for{X:array{-5, -1, 1, 5}; Z:=X+2; Z>0; Z}
+    List = array{1,3,7}
+
+assert: # for with range and expression body
+    List:[]int = for{I:=1..3; I*10}
+    List = array{10,20,30}
+
+assert: # for{I->X:Xs; I} - identifier as last expr, body is I (indices)
+    List:[]int = for{I->X:array{10,20,30}; I}
+    List = array{0,1,2}
+
+assert: # for{I->X:Xs, I} - body is (X,I)
+    List:[]tuple(int,int) = for{I->X:array{10,20,30}, I}
+    List = array{(10,0),(20,1),(30,2)}

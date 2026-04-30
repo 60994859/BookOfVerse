@@ -948,3 +948,68 @@ assert_digest_generated
                 # Enum value doc
                 First
 }
+
+# Override of a data member from a class in an @available-gated module should use
+# parenthesized type qualifier in the digest, not dot-access into the module.
+assert_digest_generated
+{
+    vpackage(P0, /A, ?Scope := InternalUser):
+        snippet:
+            using { /Verse.org/Native }
+            Unrelated<public> := module:
+                Field<public>:int = 99
+
+            @available{MinUploadedAtFNVersion:=1337}
+            Module<public> := module:
+                Base<public> := class:
+                    Field<public>:int = 0
+
+            using { /A/Module }
+            Child<public> := class(Module.Base):
+                Field<override>:int = 1
+
+    expected_digest(Package := P0, ?Variant := PublicOnly):
+        using {/A}
+        using {/Verse.org/Native}
+        # Module import path: /A/Unrelated
+        Unrelated<public> := module:
+            Field<public>:int = external{}
+
+        @available{MinUploadedAtFNVersion:=1337}
+        # Module import path: /A/Module
+        Module<public> := module:
+            Base<public> := class:
+                (/A/Module/Base:)Field<public>:int = external{}
+
+        Child<public> := class((/A:)Module.Base):
+            ((/A:)Module.Base:)Field<override>:int = external{}
+}
+
+assert_digest_generated
+{
+    vpackage(P0, /Verse.org/Verse, ?Scope := InternalUser):
+        snippet:
+            # Copyright Epic Games, Inc. All Rights Reserved.
+            using { /Verse.org/Native }
+
+            localizable_value<epic_internal> := class {}
+
+            llm_string<epic_internal> := class:
+                Value<epic_internal>: string
+
+            MakeLLMString<epic_internal>(String:string):llm_string = llm_string{Value:=String}
+
+            localizable_llm_string<epic_internal> := class(localizable_value):
+                Value<epic_internal> : string
+
+            MakeLocalizableValue<epic_internal>(V:llm_string):localizable_llm_string = localizable_llm_string{Value:=V.Value}
+
+    expected_digest(Package := P0, ?Variant := PublicOnly):
+        localizable_value<epic_internal> := class:
+
+        llm_string<epic_internal> := class:
+
+        localizable_llm_string<epic_internal> := class(localizable_value):
+
+        MakeLocalizableValue<epic_internal>(V:llm_string):localizable_llm_string = external{}
+}

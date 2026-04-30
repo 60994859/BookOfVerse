@@ -817,6 +817,14 @@ assert:
 assert:
     not Decides.F1[1, 2, ?C := 2]
 
+assert_semantic_error(3512):
+    DecideAndGetDefaultValue<public>(MaybeDefaultValue:?int)<transacts><decides>:int = MaybeDefaultValue?
+    F<public>(?Value:int=DecideAndGetDefaultValue[option{1}])<transacts><decides>:int=Value
+
+assert_semantic_error(3512):
+    DecideAndGetDefaultValue<public>(MaybeDefaultValue:?int)<transacts><decides>:int = MaybeDefaultValue?
+    F<public>(?Value:int=DecideAndGetDefaultValue[false])<transacts><decides>:int=Value
+
 #################################################
 # `suspends`
 Suspends := module:
@@ -833,3 +841,38 @@ assert:
     CoroUtils.Tick(1)
     X.Contents = 1 + 2 + 3
 
+assert_semantic_error(3512):
+    SuspendAndGetDefaultValue<public>()<suspends>:int=0
+    F<public>(?Value:int = SuspendAndGetDefaultValue())<suspends>:void={}
+
+#################################################
+# `reads`
+assert_valid               {reads_class<public> := class<reads>{}; F(?C:reads_class=reads_class{})<transacts>:void = {}}
+assert_valid               {reads_class<public> := class<reads>{}; F(?C:reads_class=reads_class{})<reads>    :void = {}}
+assert_semantic_error(3512){reads_class<public> := class<reads>{}; F(?C:reads_class=reads_class{})<writes>   :void = {}}
+assert_semantic_error(3512){reads_class<public> := class<reads>{}; F(?C:reads_class=reads_class{})<allocates>:void = {}}
+assert_semantic_error(3512){reads_class<public> := class<reads>{}; F(?C:reads_class=reads_class{})<computes> :void = {}}
+
+#################################################
+# `writes`
+assert_valid               {writes_class<public> := class<writes>{}; F(?C:writes_class=writes_class{})<transacts>:void = {}}
+assert_semantic_error(3512){writes_class<public> := class<writes>{}; F(?C:writes_class=writes_class{})<reads>    :void = {}}
+assert_valid               {writes_class<public> := class<writes>{}; F(?C:writes_class=writes_class{})<writes>   :void = {}}
+assert_semantic_error(3512){writes_class<public> := class<writes>{}; F(?C:writes_class=writes_class{})<allocates>:void = {}}
+assert_semantic_error(3512){writes_class<public> := class<writes>{}; F(?C:writes_class=writes_class{})<computes> :void = {}}
+
+#################################################
+# `allocates`
+assert_valid               {allocates_class<public> := class<allocates>{}; F(?C:allocates_class=allocates_class{})<transacts>:void = {}}
+assert_semantic_error(3512){allocates_class<public> := class<allocates>{}; F(?C:allocates_class=allocates_class{})<reads>    :void = {}}
+assert_semantic_error(3512){allocates_class<public> := class<allocates>{}; F(?C:allocates_class=allocates_class{})<writes>   :void = {}}
+assert_valid               {allocates_class<public> := class<allocates>{}; F(?C:allocates_class=allocates_class{})<allocates>:void = {}}
+assert_semantic_error(3512){allocates_class<public> := class<allocates>{}; F(?C:allocates_class=allocates_class{})<computes> :void = {}}
+
+#################################################
+# `transacts`
+assert_valid               {transacts_class<public> := class<transacts>{}; F(?C:transacts_class=transacts_class{})<transacts>:void = {}}
+assert_semantic_error(3512){transacts_class<public> := class<transacts>{}; F(?C:transacts_class=transacts_class{})<reads>    :void = {}}
+assert_semantic_error(3512){transacts_class<public> := class<transacts>{}; F(?C:transacts_class=transacts_class{})<writes>   :void = {}}
+assert_semantic_error(3512){transacts_class<public> := class<transacts>{}; F(?C:transacts_class=transacts_class{})<allocates>:void = {}}
+assert_semantic_error(3512){transacts_class<public> := class<transacts>{}; F(?C:transacts_class=transacts_class{})<computes> :void = {}}

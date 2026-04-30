@@ -279,4 +279,14 @@ TypeVariableCapture := module:
 
 assert:
     TypeVariableCapture.CaptureType(TypeVariableCapture.my_class)
+
+ParametricTypeVariableCapture := module:
+    my_class<public>(t:subtype(comparable), u:subtype(comparable)) := class:
+        Clone<public>():void = my_class(t, u):
+            MakeMyClass<constructor>(t, u, Self)
+
+    MakeMyClass<public><constructor>(t:subtype(comparable), u:subtype(comparable), Src:my_class(t, u)) := my_class(t, u):
+
+assert:
+    ParametricTypeVariableCapture.my_class(int, int){}.Clone()
 }

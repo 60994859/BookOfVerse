@@ -638,3 +638,32 @@ assert:
     Expected := "\{\"$package_name\":\"/SolIdeDataSources/_Verse\",\"$class_name\":\"class7\",\"x_Data1\":\{\"x_A\":\{\"$package_name\":\"/Engine/_Verse/VNI/VerseTestScriptCmd\",\"$class_name\":\"external_persistable_class1\",\"x_A\":1\}\}\}"
     X := Persistence.FromJson[Expected, class7]
     Expected = Persistence.ToJson[X]
+
+# Class containing a verse method
+class8 := class:
+    Data1:int
+    Method<public>()<transacts><decides>:int=
+        42
+
+assert:
+    Expected := "\{\"$package_name\":\"/SolIdeDataSources/_Verse\",\"$class_name\":\"class8\",\"x_Data1\":99\}"
+    X := Persistence.FromJson[Expected, class8]
+    42 = X.Method[]
+    99 = X.Data1
+    Expected = Persistence.ToJson[X]
+
+# Class containing a function field (should fail)
+class9 := class:
+    var Func:type{_():int}
+
+verse_vm_only {
+assert:
+    not Persistence.FromJson["\{\"$package_name\":\"/SolIdeDataSources/_Verse\",\"$class_name\":\"class9\"\}", class9]
+}
+
+MyFn():int=
+    42
+
+assert:
+    X := class9{ Func:= MyFn }
+    not Persistence.ToJson[X]

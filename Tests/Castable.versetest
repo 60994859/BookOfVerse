@@ -603,3 +603,10 @@ assert_valid:
         Concrete := t
     Main():void =
         X := MakeClass3(class2)
+
+assert_valid:
+    class1 := class{}
+    class2 := class<castable>(class1){}
+    class3(t:castable_subtype(class1)) := class{}
+    class4 := class:
+        Data:class3(class2)

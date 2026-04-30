@@ -1273,11 +1273,13 @@ assert:
 
 # Simple test that makes sure our bat signal infrastructure works as expected in the presence of `race`.
 TestBatSignalRace0()<suspends>:void =
+    E := event(){}
+
     race:
         block:
-            CoroUtils.WaitForBatSignal()
+            E.Await()
         block:
-            CoroUtils.DoSomethingThatCausesBatSignalToResume()
+            CoroUtils.SignalTransacts(E, ())
 
             # This will suspend, which will cause the `NotHit` not to be hit!
             CoroUtils.WaitTicks(1)
@@ -1298,6 +1300,7 @@ CheckThenSetOrErr(Orderer : int, Expected : int)<transacts>:int =
     Orderer + 1
 
 TestBatSignalRace1()<suspends>:void =
+    E := event(){}
     var Orderer:int = 0
 
     race:
@@ -1306,7 +1309,7 @@ TestBatSignalRace1()<suspends>:void =
             set Orderer = CheckThenSetOrErr(Orderer, 0)
 
             # Then we wait for the bat-signal to trigger
-            CoroUtils.WaitForBatSignal()
+            E.Await()
 
             # Get here third.
             set Orderer = CheckThenSetOrErr(Orderer, 2)
@@ -1315,7 +1318,7 @@ TestBatSignalRace1()<suspends>:void =
             set Orderer = CheckThenSetOrErr(Orderer, 1)
 
             if:
-                CoroUtils.DoSomethingThatCausesBatSignalToResume()
+                CoroUtils.SignalTransacts(E, ())
 
                 # Just to make the compiler happy.
                 true?
@@ -1341,13 +1344,15 @@ assert:
     spawn{TestBatSignalRace1()}
 
 TestBatSignalRace2()<suspends>:void =
+    E := event(){}
+
     race:
         block:
             # Get here first.
             CoroUtils.ResetThenLogEvent("A")
 
             # Then we wait for the bat-signal to trigger
-            CoroUtils.WaitForBatSignal()
+            E.Await()
 
             # Get here fourth.
             CoroUtils.LogEvent("D")
@@ -1359,7 +1364,7 @@ TestBatSignalRace2()<suspends>:void =
                 # Get here third.
                 CoroUtils.LogEvent("C")
 
-                CoroUtils.DoSomethingThatCausesBatSignalToResume()
+                CoroUtils.SignalTransacts(E, ())
 
                 # Make this fail so that the failure context is undone.
                 false?
@@ -1398,17 +1403,16 @@ assert:
     spawn{TestBatSignalRace2()}
     CoroUtils.Tick(1)
 
-    # flush out the bat-signal because we technically wouldn't have called it above!
-    CoroUtils.DoSomethingThatCausesBatSignalToResume()
-
 TestBatSignalRace3()<suspends>:void =
+    E := event(){}
+
     race:
         block:
             # Get here first.
             CoroUtils.ResetThenLogEvent("A")
 
             # Then we wait for the bat-signal to trigger
-            CoroUtils.WaitForBatSignal()
+            E.Await()
 
             # Get here fourth.
             CoroUtils.LogEvent("D")
@@ -1420,7 +1424,7 @@ TestBatSignalRace3()<suspends>:void =
                 # Get here third.
                 CoroUtils.LogEvent("C")
 
-                CoroUtils.DoSomethingThatCausesBatSignalToResume()
+                CoroUtils.SignalTransacts(E, ())
 
                 # Make this fail so that the failure context is undone.
                 false?
@@ -1430,7 +1434,7 @@ TestBatSignalRace3()<suspends>:void =
             CoroUtils.LogEvent("F")
 
             # Because we should have failed to bat-signal above, we do it again now!
-            CoroUtils.DoSomethingThatCausesBatSignalToResume()
+            CoroUtils.SignalTransacts(E, ())
 
             CoroUtils.LogEvent("G")
 
@@ -1473,6 +1477,52 @@ TestBatSignalRace3()<suspends>:void =
 assert:
     spawn{TestBatSignalRace3()}
     CoroUtils.Tick(1)
+
+TestSignalLoop(Event:event())<suspends>:void =
+    loop:
+        race:
+            Event.Await()
+            block:
+                CoroUtils.LogEvent("A")
+                defer:
+                    CoroUtils.LogEvent("B")
+                CoroUtils.WaitTicks(1)
+
+TestSignalLoopRetry()<suspends>:void =
+    Event := event(){}
+    spawn{TestSignalLoop(Event)}
+
+    # Commit and start a new transaction.
+    NextTick()
+
+    # Finish the race, cancel the second arm, and restart the loop body.
+    # This overwrites parts of the frame used by the canceled arm.
+    Event.Signal()
+
+    # Roll back to NextTick and finish the race again.
+    TestUtils.CauseAutoRTFMRetryTransaction[] or Err()
+    CoroUtils.GetEventLogString() = "A>BABA" or Err()
+
+assert:
+    if (IsAutoRTFMEnabled[]):
+        spawn{TestSignalLoopRetry()}
+
+MoveAfterResume := module:
+    F<public>(E:event(int))<suspends>:void =
+        Result := E.Await()
+        CoroUtils.LogEvent("{Result}")
+
+assert:
+    E := event(int){}
+    spawn{MoveAfterResume.F(E)}
+    if:
+        CoroUtils.SignalTransacts(E, 3)
+        false?
+    E.Signal(5)
+    if (IsAutoRTFMEnabled[]):
+        CoroUtils.GetEventLogString() = "35"
+    else:
+        CoroUtils.GetEventLogString() = "3"
 
 # TODO(SOL-9046): BPVM fails to detect this runtime error
 verse_vm_only{

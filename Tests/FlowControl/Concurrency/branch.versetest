@@ -86,7 +86,7 @@ assert:
 
 ############################################
 # Disallow `branch` in method / non-coroutine scope
-assert_semantic_error(3530):
+assert_semantic_error(3512):
 
     Coro()<suspends>:void={}
     StdFunc():void=
@@ -105,19 +105,6 @@ assert_valid:
         branch:
             Coro1()
 
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Allow `branch` in coroutine scope - even if within immediate `defer`
-assert_valid:
-
-    Coro1()<suspends>:void={}
-
-
-    Coro2()<suspends>:void=
-        defer:
-            branch:
-                Coro1()
-        Coro1()
 
 # Can't break or return from a branch.
 assert_semantic_error(bp_vm_only{3552}; verse_vm_only{3556}):

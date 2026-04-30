@@ -82,24 +82,63 @@ assert_link_error(9003):
     F()<allocates>:void={var X:int = 0}
     Y:void = UnsafeCast(F, type{_()<converges>:void})()
 
-assert_link_error(verse_vm_only{9003}): # Doesn't produce an error on the BPVM because BPVM doesn't run blocks on global instances of classes.
-    c0 := class<allocates>{block{var X:int = 0}}
-    C0:c0 = c0{}
-
-assert_link_error(verse_vm_only{9003}): # Doesn't produce an error on the BPVM because BPVM doesn't run blocks on global instances of classes.
-    F()<allocates>:c1=c1{}
-    c0 := class<allocates>{block{F()}}
-    c1 := class<allocates>{var X:int=0}
-    Submodule := module:
+verse_vm_only:
+    assert_link_error(9003): 
+        c0 := class<allocates>{block{var X:int = 0}}
         C0:c0 = c0{}
 
-assert_link_error(verse_vm_only{9003}): # Doesn't produce an error on the BPVM because BPVM doesn't run blocks on global instances of classes.
-    F()<allocates>:int=
-        var X:int = 0
-        return 1
-    c0 := class<allocates>{block{F()}}
-    Submodule := module:
+    assert_link_error(9003): 
+        F()<allocates>:c1=c1{}
+        c0 := class<allocates>{block{F()}}
+        c1 := class<allocates>{var X:int=0}
+        Submodule := module:
+            C0:c0 = c0{}
+
+    assert_link_error(9003): 
+        F()<allocates>:int=
+            var X:int = 0
+            return 1
+        c0 := class<allocates>{block{F()}}
+        Submodule := module:
+            C0:c0 = c0{}
+
+    assert_link_error(9003):
+        F(Condition:logic)<allocates>:int=
+            if(Condition?):
+                var X:int = 0
+            return 1
+        c0 := class<allocates>{block{F(true)}}
+        Submodule := module:
+            C0:c0 = c0{}
+
+bp_vm_only:
+    assert_link_valid(): # BPVM doesn't run blocks on global instances of classes, so no error.
+        c0 := class<allocates>{block{var X:int = 0}}
         C0:c0 = c0{}
+
+    assert_link_valid(): # BPVM doesn't run blocks on global instances of classes, so no error.
+        F()<allocates>:c1=c1{}
+        c0 := class<allocates>{block{F()}}
+        c1 := class<allocates>{var X:int=0}
+        Submodule := module:
+            C0:c0 = c0{}
+
+    assert_link_valid(): # BPVM doesn't run blocks on global instances of classes, so no error.
+        F()<allocates>:int=
+            var X:int = 0
+            return 1
+        c0 := class<allocates>{block{F()}}
+        Submodule := module:
+            C0:c0 = c0{}
+
+    assert_link_valid(): # BPVM doesn't run blocks on global instances of classes, so no error.
+        F(Condition:logic)<allocates>:int=
+            if(Condition?):
+                var X:int = 0
+            return 1
+        c0 := class<allocates>{block{F(true)}}
+        Submodule := module:
+            C0:c0 = c0{}
 
 assert_valid:
     F(Condition:logic)<allocates>:int=
@@ -107,15 +146,6 @@ assert_valid:
             var X:int = 0
         return 1
     c0 := class<allocates>{block{F(false)}}
-    Submodule := module:
-        C0:c0 = c0{}
-
-assert_link_error(verse_vm_only{9003}): # Doesn't produce an error on the BPVM because BPVM doesn't run blocks on global instances of classes.
-    F(Condition:logic)<allocates>:int=
-        if(Condition?):
-            var X:int = 0
-        return 1
-    c0 := class<allocates>{block{F(true)}}
     Submodule := module:
         C0:c0 = c0{}
 

@@ -68,6 +68,23 @@ assert:
     Y = 3
 
 assert:
+    var X:[]int = array{1, 2, 3, 4, 5, 6}
+    set X += array{2, 3}
+    set X += array{2, 3}
+    set X += array{2, 3}
+    set X += array{2, 3}
+    set X += array{2, 3}
+    X.Length = 16
+    if (
+        set X += array{2, 3}
+        live Y:int = X[X.Length - 1] or 1234
+        (Y = 3) or Err()
+        0 = 1
+        ) {}
+
+    X.Length = 16
+
+assert:
     var X:[]int = array{1}
     live Y:int = X[X.Length - 1] or 1234
     Y = 1
@@ -90,3 +107,100 @@ assert:
     Box.Count = 2
 
 } # verse_vm_only
+
+my_struct := struct<computes>:
+    X:[]int = array{}
+
+my_struct_nested := struct<computes>:
+    Inner:my_struct = my_struct{}
+
+assert:
+    var S:my_struct = my_struct{}
+    set S.X += array{1, 2, 3}
+    S.X = array{1, 2, 3}
+
+assert:
+    var S:my_struct = my_struct{X := array{1, 2, 3}}
+    set S.X += array{4, 5}
+    S.X = array{1, 2, 3, 4, 5}
+
+assert:
+    var S:my_struct = my_struct{}
+    set S.X += array{1}
+    set S.X += array{2}
+    set S.X += array{3}
+    S.X = array{1, 2, 3}
+
+assert:
+    var S:my_struct = my_struct{}
+    for (I := 0..4):
+        set S.X += array{I}
+    S.X = array{0, 1, 2, 3, 4}
+
+assert:
+    var S:my_struct = my_struct{X := array{1, 2, 3}}
+    set S.X += if (set S.X = array{0}; 0=0) { array{42} } else { array{42} }
+    S.X = array{0, 42}
+
+assert:
+    var S:my_struct_nested = my_struct_nested{}
+    set S.Inner.X += array{10, 20}
+    S.Inner.X = array{10, 20}
+
+verse_vm_only
+{
+assert:
+    var S:my_struct = my_struct{}
+    live Y:int = S.X.Length
+    Y = 0
+    set S.X += array{1, 2}
+    Y = 2
+
+assert:
+    var S:my_struct = my_struct{X := array{1}}
+    live Y:int = S.X[S.X.Length - 1] or 1234
+    Y = 1
+    set S.X += array{2, 3}
+    Y = 3
+} # verse_vm_only
+
+assert:
+    var M:[int][]int = map{}
+    set M[42] = array{}
+    set M[42] += array{1}
+    set M[42] += array{2}
+    set M[42] += array{3}
+    M[42] = array{1, 2, 3}
+
+assert:
+    var M:[][]int = array{array{}}
+    set M[0] = array{}
+    set M[0] += array{1}
+    set M[0] += array{2}
+    set M[0] += array{3}
+    M[0] = array{1, 2, 3}
+
+assert:
+    var M:[int][]int = map{}
+    set M[42] = array{}
+    set M[42] += if (set M[42] = array{0}; 0=0) { array{42} } else { array{42} }
+    M[42] = array{0, 42}
+
+verse_vm_only
+{
+assert:
+    var M:[][]int = array{array{}}
+    live Y:int = M[0].Length or 1234
+    Y = 0
+    set M[0] += array{1, 2}
+    Y = 2
+
+assert:
+    var M:[int][]int = map{}
+    set M[42] = array{}
+    live Y:int = M[42].Length or 1234
+    Y = 0
+    set M[42] += array{2, 3}
+    Y = 2
+} # verse_vm_only
+

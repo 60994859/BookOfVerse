@@ -9,7 +9,7 @@ assert_valid:
                     var Y:int = 3
 
 assert_semantic_error(3512):
-    vpackage(P0, /Verse.org/Verse, ?Scope:=PublicAPI, ?UploadedAtFNVersion:=3730):
+    vpackage(P0, /Verse.org/Verse, ?Scope:=PublicAPI, ?UploadedAtFNVersion:=4000):
         snippet:
             my_class := class:
                 X:[]int = array:
@@ -27,7 +27,7 @@ assert_valid:
                     W
 
 assert_semantic_error(3512):
-    vpackage(P0, /Verse.org/Verse, ?Scope:=PublicAPI, ?UploadedAtFNVersion:=3730):
+    vpackage(P0, /Verse.org/Verse, ?Scope:=PublicAPI, ?UploadedAtFNVersion:=4000):
         snippet:
             my_class := class:
                 Z:int = block:

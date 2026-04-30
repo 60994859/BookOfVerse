@@ -864,7 +864,12 @@ assert:
 
 
 ############################################
-# Test immediate returning async in `defer` - `branch` and `spawn`
+# Test immediate returning async in `defer` - `spawn`
+
+TestCoroM1N()<suspends>:void=
+    Log("M")
+    Wait(1)
+    Log("N")
 
 TestCoroY2Z()<suspends>:void=
     Log("Y")
@@ -878,10 +883,7 @@ TestCoroImmediateAsyncInDefer()<suspends>:void=
             Log("a")
             defer:
                 Log("b")
-                branch:
-                    Log("M")
-                    Wait(1)
-                    Log("N")
+                spawn {TestCoroM1N()}
                 Log("c")
             Wait(4)  # call defer "b"
             Log("d")
@@ -901,9 +903,7 @@ assert:
     spawn{TestCoroImmediateAsyncInDefer()}
     Tick(4)
 
-    # BPVM cancellation does not catch the `branch` child created during unwinding
-    verse_vm_only{ GetLogStr() = "Aa1,42Y3bMcB,,Z,C" }
-    bp_vm_only{ GetLogStr() = "Aa1,42Y3bMcB,N,Z,C" }
+    GetLogStr() = "Aa1,42Y3bMcB,N,Z,C"
 
 
 ############################################
@@ -1086,23 +1086,6 @@ assert_semantic_error(3512):
         defer:
             Log("B1")
             Coro()
-            Log("B2")
-        Log("C")
-
-
-# Ensure that defer allows immediate `branch` expression
-assert_valid:
-    
-    Coro()<suspends>:void={}
-    Log(Msg:string):void={}
-
-    
-    TestCoro()<suspends>:void=
-        Log("A")
-        defer:
-            Log("B1")
-            branch:
-                Coro()
             Log("B2")
         Log("C")
 

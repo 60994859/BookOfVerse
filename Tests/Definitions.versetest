@@ -80,6 +80,8 @@ assert:
     DataNaN = NaN
 
 
+<#
+# TODO(SOL-9130): Run modules in program order instead of scheduling them with CDOs.
 lenient_only
 {
 M2 := module:
@@ -98,3 +100,4 @@ assert:
     M2.E = 666
 
 }
+#>

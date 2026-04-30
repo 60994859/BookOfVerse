@@ -17,298 +17,369 @@ arm := struct:
     Delay:int
     Return:?string = false
 
-noreturn_arm := struct:
-    Delay:int
-
-Test(F:type{_(:arm, :arm, :noreturn_arm)<suspends>:string}, Ticks:int, Args:tuple(arm, arm, noreturn_arm))<suspends>:void =
+Test(F:type{_(:t)<suspends>:string}, Ticks:int, Args:t where t:type)<suspends>:void =
     R := F(Args)
     Log(R)
     Tick(Ticks)
 
 ### basic tests
 ###
-Sync(Arm1:arm, Arm2:arm, Arm3:noreturn_arm)<suspends>:string =
+Sync(Arm1:arm, Arm2:arm, Arm3:arm)<suspends>:string =
     defer { Log("z") }
-    R :=
-        sync:
-            block:
-                defer { Log("a") }
-                Wait(Arm1.Delay)
-                if (V := Arm1.Return?):
-                    return V
-                Log("1")
-                1
-            block:
-                defer { Log("b") }
-                Wait(Arm2.Delay)
-                if (V := Arm2.Return?):
-                    return V
-                Log("2")
-                2
-            block:
-                defer { Log("c") }
-                Wait(Arm3.Delay)
-                Log("3")
-                3
+    R := sync:
+        block:
+            defer { Log("a") }
+            Wait(Arm1.Delay)
+            if (V := Arm1.Return?):
+                return V
+            Log("1")
+            1
+        block:
+            defer { Log("b") }
+            Wait(Arm2.Delay)
+            if (V := Arm2.Return?):
+                return V
+            Log("2")
+            2
+        block:
+            defer { Log("c") }
+            Wait(Arm3.Delay)
+            if (V := Arm3.Return?):
+                return V
+            Log("3")
+            3
 
     "({R(0)}|{R(1)}|{R(2)})"
 
 assert:
-    spawn{Test(Sync, 1, (arm{Delay := 1}, arm{Delay := 1}, noreturn_arm{Delay := 1}))}
+    spawn{Test(Sync, 0, (arm{Delay := 0}, arm{Delay := 0}, arm{Delay := 0}))}
+    AssertLog("1a2b3cz(1|2|3)")
+assert:
+    spawn{Test(Sync, 0, (arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0}, arm{Delay := 0}))}
+    AssertLog("azX")
+assert:
+    spawn{Test(Sync, 0, (arm{Delay := 0}, arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0}))}
+    AssertLog("1abzX")
+assert:
+    spawn{Test(Sync, 0, (arm{Delay := 1}, arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0}))}
+    AssertLog("bazX", ?BPVM := "bzaX")
+assert:
+    spawn{Test(Sync, 1, (arm{Delay := 1}, arm{Delay := 1}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",1a2b3cz(1|2|3),,")
 assert:
-    spawn{Test(Sync, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1}, noreturn_arm{Delay := 1}))}
+    spawn{Test(Sync, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",acbzX,,", ?BPVM := ",azcbX,,")
 assert:
-    spawn{Test(Sync, 1, (arm{Delay := 1}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(Sync, 1, (arm{Delay := 1}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",1abczY,,", ?BPVM := ",1abzcY,,")
 assert:
-    spawn{Test(Sync, 1, (arm{Delay := 2, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(Sync, 1, (arm{Delay := 2, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",bcazY,,", ?BPVM := ",bzcaY,,")
 assert:
-    spawn{Test(Sync, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(Sync, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",acbzX,,", ?BPVM := ",azcbX,,")
 
-Race(Arm1:arm, Arm2:arm, Arm3:noreturn_arm)<suspends>:string =
+Race(Arm1:arm, Arm2:arm, Arm3:arm)<suspends>:string =
     defer { Log("z") }
-    R :=
-        race:
-            block:
-                defer { Log("a") }
-                Wait(Arm1.Delay)
-                if (V := Arm1.Return?):
-                    return V
-                Log("1")
-                1
-            block:
-                defer { Log("b") }
-                Wait(Arm2.Delay)
-                if (V := Arm2.Return?):
-                    return V
-                Log("2")
-                2
-            block:
-                defer { Log("c") }
-                Wait(Arm3.Delay)
-                Log("3")
-                3
+    R := race:
+        block:
+            defer { Log("a") }
+            Wait(Arm1.Delay)
+            if (V := Arm1.Return?):
+                return V
+            Log("1")
+            1
+        block:
+            defer { Log("b") }
+            Wait(Arm2.Delay)
+            if (V := Arm2.Return?):
+                return V
+            Log("2")
+            2
+        block:
+            defer { Log("c") }
+            Wait(Arm3.Delay)
+            if (V := Arm3.Return?):
+                return V
+            Log("3")
+            3
 
     "({R})"
 
 assert:
-    spawn{Test(Race, 1, (arm{Delay := 1}, arm{Delay := 1}, noreturn_arm{Delay := 1}))}
+    spawn{Test(Race, 0, (arm{Delay := 0}, arm{Delay := 0}, arm{Delay := 0}))}
+    AssertLog("1az(1)")
+assert:
+    spawn{Test(Race, 0, (arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0}, arm{Delay := 0}))}
+    AssertLog("azX")
+assert:
+    spawn{Test(Race, 0, (arm{Delay := 1}, arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0}))}
+    AssertLog("bazX", ?BPVM := "bzaX")
+assert:
+    spawn{Test(Race, 1, (arm{Delay := 1}, arm{Delay := 1}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",1acbz(1),,", ?BPVM := ",1abcz(1),,")
 assert:
-    spawn{Test(Race, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1}, noreturn_arm{Delay := 1}))}
+    spawn{Test(Race, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",acbzX,,", ?BPVM := ",azcbX,,")
 assert:
-    spawn{Test(Race, 1, (arm{Delay := 1}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(Race, 1, (arm{Delay := 1}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",1acbz(1),,", ?BPVM := ",1abcz(1),,")
 assert:
-    spawn{Test(Race, 1, (arm{Delay := 2, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(Race, 1, (arm{Delay := 2, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",bcazY,,", ?BPVM := ",bzcaY,,")
 
-Rush(Arm1:arm, Arm2:arm, Arm3:noreturn_arm)<suspends>:string =
+Rush(Arm1:arm, Arm2:arm, Arm3:arm)<suspends>:string =
     defer { Log("z") }
-    R :=
-        rush:
-            block:
-                defer { Log("a") }
-                Wait(Arm1.Delay)
-                if (V := Arm1.Return?):
-                    return V
-                Log("1")
-                1
-            block:
-                defer { Log("b") }
-                Wait(Arm2.Delay)
-                if (V := Arm2.Return?):
-                    return V
-                Log("2")
-                2
-            block:
-                defer { Log("c") }
-                Wait(Arm3.Delay)
-                Log("3")
-                3
+    R := rush:
+        block:
+            defer { Log("a") }
+            Wait(Arm1.Delay)
+            if (V := Arm1.Return?):
+                return V
+            Log("1")
+            1
+        block:
+            defer { Log("b") }
+            Wait(Arm2.Delay)
+            if (V := Arm2.Return?):
+                return V
+            Log("2")
+            2
+        block:
+            defer { Log("c") }
+            Wait(Arm3.Delay)
+            if (V := Arm3.Return?):
+                return V
+            Log("3")
+            3
 
     "({R})"
 
 assert:
-    spawn{Test(Rush, 2, (arm{Delay := 1}, arm{Delay := 1}, noreturn_arm{Delay := 1}))}
+    spawn{Test(Rush, 0, (arm{Delay := 0}, arm{Delay := 0}, arm{Delay := 0}))}
+    AssertLog("1a2b3cz(1)")
+assert:
+    # Weird? When an early arm escapes synchronously, later arms begin before the function returns
+    spawn{Test(Rush, 0, (arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0}, arm{Delay := 0}))}
+    AssertLog("a2b3czX", ?BPVM := "azX")
+assert:
+    spawn{Test(Rush, 1, (arm{Delay := 0, Return := option{"X"}}, arm{Delay := 1}, arm{Delay := 0}))}
+    AssertLog("a3czX,2b", ?BPVM := "azX,")
+assert:
+    spawn{Test(Rush, 0, (arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0, Return := option{"Y"}}, arm{Delay := 0}))}
+    AssertLog("ab3czX", ?BPVM := "azX")
+assert:
+    spawn{Test(Rush, 1, (arm{Delay := 0, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 0}))}
+    AssertLog("a3czX,b", ?BPVM := "azX,")
+assert:
+    # Weird? The `return` loses to an earlier arm when setting the escape thunk param, which is shared by the resume and return paths.
+    spawn{Test(Rush, 0, (arm{Delay := 0}, arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0}))}
+    AssertLog("1ab3cz(1)", ?BPVM := "1abzX")
+assert:
+    spawn{Test(Rush, 1, (arm{Delay := 1}, arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0}))}
+    AssertLog("b3czX,1a", ?BPVM := "bzaX,")
+assert:
+    spawn{Test(Rush, 2, (arm{Delay := 1}, arm{Delay := 1}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",1az(1),2b3c,,", ?BPVM := ",1azcb(1),,,")
 assert:
-    spawn{Test(Rush, 2, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1}, noreturn_arm{Delay := 1}))}
+    spawn{Test(Rush, 2, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",azX,2b3c,,", ?BPVM := ",azcbX,,,")
 assert:
-    spawn{Test(Rush, 2, (arm{Delay := 1}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(Rush, 2, (arm{Delay := 1}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",1az(1),b3c,,", ?BPVM := ",1azcb(1),,,")
 assert:
-    spawn{Test(Rush, 2, (arm{Delay := 2, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(Rush, 2, (arm{Delay := 2, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",bzY,a3c,,", ?BPVM := ",bzcaY,,,")
 
 
 ### self-cancellation tests
 ###
-SelfCancelSync(Arm1:arm, Arm2:arm, Arm3:noreturn_arm)<suspends>:string =
+SelfCancelSync(Arm1:arm, Arm2:arm, Arm3:arm)<suspends>:string =
     defer { Log("z") }
     Event:event() = event(){}
-    R :=
-        sync:
-            block:
-                defer { Log("a") }
-                Wait(Arm1.Delay)
-                Event.Await()
-                if (V := Arm1.Return?):
-                    return V
-                Log("1")
-                1
-            block:
-                defer { Log("b") }
-                Wait(Arm2.Delay)
-                Event.Signal()
-                if (V := Arm2.Return?):
-                    return V
-                Log("2")
-                2
-            block:
-                defer { Log("c") }
-                Wait(Arm3.Delay)
-                Log("3")
-                3
+    R := sync:
+        block:
+            defer { Log("a") }
+            Wait(Arm1.Delay)
+            Event.Await()
+            if (V := Arm1.Return?):
+                return V
+            Log("1")
+            1
+        block:
+            defer { Log("b") }
+            Wait(Arm2.Delay)
+            Event.Signal()
+            if (V := Arm2.Return?):
+                return V
+            Log("2")
+            2
+        block:
+            defer { Log("c") }
+            Wait(Arm3.Delay)
+            if (V := Arm3.Return?):
+                return V
+            Log("3")
+            3
 
     "({R(0)}|{R(1)}|{R(2)})"
 
 assert:
-    spawn{Test(SelfCancelSync, 1, (arm{Delay := 1}, arm{Delay := 1}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelSync, 0, (arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0}, arm{Delay := 0}))}
+    AssertLog("a2bzX", ?BPVM := "azX2b")
+verse_vm_only{ # Crashes BPVM
+assert:
+    spawn{Test(SelfCancelSync, 0, (arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0, Return := option{"Y"}}, arm{Delay := 0}))}
+    AssertLog("abzX")
+} #verse_vm_only
+assert:
+    spawn{Test(SelfCancelSync, 1, (arm{Delay := 1}, arm{Delay := 1}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",1a2b3cz(1|2|3),,")
 assert:
-    spawn{Test(SelfCancelSync, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelSync, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",ac2bzX,,", ?BPVM := ",azcX,2b,")
 assert:
-    spawn{Test(SelfCancelSync, 1, (arm{Delay := 1}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelSync, 1, (arm{Delay := 1}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",1abczY,,", ?BPVM := ",1abzcY,,")
 assert:
-    spawn{Test(SelfCancelSync, 1, (arm{Delay := 2, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelSync, 1, (arm{Delay := 2, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",bcazY,,", ?BPVM := ",bzcaY,,")
 assert:
-    spawn{Test(SelfCancelSync, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelSync, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",acbzX,,", ?BPVM := ",azcX,bz,")
 
-SelfCancelRace(Arm1:arm, Arm2:arm, Arm3:noreturn_arm)<suspends>:string =
+SelfCancelRace(Arm1:arm, Arm2:arm, Arm3:arm)<suspends>:string =
     defer { Log("z") }
     Event:event() = event(){}
-    R :=
-        race:
-            block:
-                defer { Log("a") }
-                Wait(Arm1.Delay)
-                Event.Await()
-                if (V := Arm1.Return?):
-                    return V
-                Log("1")
-                1
-            block:
-                defer { Log("b") }
-                Wait(Arm2.Delay)
-                Event.Signal()
-                if (V := Arm2.Return?):
-                    return V
-                Log("2")
-                2
-            block:
-                defer { Log("c") }
-                Wait(Arm3.Delay)
-                Log("3")
-                3
+    R := race:
+        block:
+            defer { Log("a") }
+            Wait(Arm1.Delay)
+            Event.Await()
+            if (V := Arm1.Return?):
+                return V
+            Log("1")
+            1
+        block:
+            defer { Log("b") }
+            Wait(Arm2.Delay)
+            Event.Signal()
+            if (V := Arm2.Return?):
+                return V
+            Log("2")
+            2
+        block:
+            defer { Log("c") }
+            Wait(Arm3.Delay)
+            if (V := Arm3.Return?):
+                return V
+            Log("3")
+            3
 
     "({R})"
 
+verse_vm_only{ # Crashes BPVM
 assert:
-    spawn{Test(SelfCancelRace, 1, (arm{Delay := 1}, arm{Delay := 1}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelRace, 0, (arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0}, arm{Delay := 0}))}
+    AssertLog("a2bzX")
+assert:
+    spawn{Test(SelfCancelRace, 0, (arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0, Return := option{"Y"}}, arm{Delay := 0}))}
+    AssertLog("abzX")
+} #verse_vm_only
+assert:
+    spawn{Test(SelfCancelRace, 1, (arm{Delay := 1}, arm{Delay := 1}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",1ac2bz(1),,", ?BPVM := ",1acz(1),2b,")
 assert:
-    spawn{Test(SelfCancelRace, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelRace, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",ac2bzX,,", ?BPVM := ",azcX,2bz,")
 assert:
-    spawn{Test(SelfCancelRace, 1, (arm{Delay := 1}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelRace, 1, (arm{Delay := 1}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",1acbz(1),,", ?BPVM := ",1acz(1),bz,")
 assert:
-    spawn{Test(SelfCancelRace, 1, (arm{Delay := 2, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelRace, 1, (arm{Delay := 2, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",bcazY,,", ?BPVM := ",bzcaY,,")
 assert:
-    spawn{Test(SelfCancelRace, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelRace, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",acbzX,,", ?BPVM := ",azcX,bz,")
 
-SelfCancelRush(Arm1:arm, Arm2:arm, Arm3:noreturn_arm)<suspends>:string =
+SelfCancelRush(Arm1:arm, Arm2:arm, Arm3:arm)<suspends>:string =
     defer { Log("z") }
     Event:event() = event(){}
-    R :=
-        rush:
-            block:
-                defer { Log("a") }
-                Wait(Arm1.Delay)
-                Event.Await()
-                if (V := Arm1.Return?):
-                    return V
-                Log("1")
-                1
-            block:
-                defer { Log("b") }
-                Wait(Arm2.Delay)
-                Event.Signal()
-                if (V := Arm2.Return?):
-                    return V
-                Log("2")
-                2
-            block:
-                defer { Log("c") }
-                Wait(Arm3.Delay)
-                Log("3")
-                3
+    R := rush:
+        block:
+            defer { Log("a") }
+            Wait(Arm1.Delay)
+            Event.Await()
+            if (V := Arm1.Return?):
+                return V
+            Log("1")
+            1
+        block:
+            defer { Log("b") }
+            Wait(Arm2.Delay)
+            Event.Signal()
+            if (V := Arm2.Return?):
+                return V
+            Log("2")
+            2
+        block:
+            defer { Log("c") }
+            Wait(Arm3.Delay)
+            if (V := Arm3.Return?):
+                return V
+            Log("3")
+            3
 
     "({R})"
 
+verse_vm_only{ # Crashes BPVM
 assert:
-    spawn{Test(SelfCancelRush, 1, (arm{Delay := 1}, arm{Delay := 1}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelRush, 0, (arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0}, arm{Delay := 0}))}
+    AssertLog("a2b3czX")
+assert:
+    spawn{Test(SelfCancelRush, 0, (arm{Delay := 0, Return := option{"X"}}, arm{Delay := 0, Return := option{"Y"}}, arm{Delay := 0}))}
+    AssertLog("ab3czX")
+} #verse_vm_only
+assert:
+    spawn{Test(SelfCancelRush, 1, (arm{Delay := 1}, arm{Delay := 1}, arm{Delay := 1}))}
     Tick(3)
     AssertLog(",1az(1),3c2b,,", ?BPVM := ",1azc(1),2b,,")
 assert:
-    spawn{Test(SelfCancelRush, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelRush, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1}, arm{Delay := 1}))}
     Tick(3)
     AssertLog(",azX,3c2b,,", ?BPVM := ",azcX,2bz,,")
 assert:
-    spawn{Test(SelfCancelRush, 1, (arm{Delay := 1}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelRush, 1, (arm{Delay := 1}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(3)
     AssertLog(",1az(1),3cb,,", ?BPVM := ",1azc(1),bz,,")
 assert:
-    spawn{Test(SelfCancelRush, 1, (arm{Delay := 2, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelRush, 1, (arm{Delay := 2, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",bzY,3ca,", ?BPVM := ",bzcaY,,")
 assert:
-    spawn{Test(SelfCancelRush, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, noreturn_arm{Delay := 1}))}
+    spawn{Test(SelfCancelRush, 1, (arm{Delay := 1, Return := option{"X"}}, arm{Delay := 1, Return := option{"Y"}}, arm{Delay := 1}))}
     Tick(2)
     AssertLog(",azX,3cb,", ?BPVM := ",azcX,bz,")

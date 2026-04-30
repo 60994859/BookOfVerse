@@ -177,29 +177,6 @@ assert:
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Task that creates a child during unwinding
-TestTaskUnwindBranch()<suspends>:void=
-    defer:
-        Log("c")
-        branch:
-            defer:
-                Log("g")
-            Log("d")
-            Wait(1)
-            Log("f")
-        Log("e")
-    Log("a")
-    Wait(1)
-    Log("b")
-
-assert:
-    Task:task(void) = spawn{TestTaskUnwindBranch()}
-    spawn{Task.Cancel()}
-    Tick(1)
-    GetLogStr() = "acdeg,"
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Task result - query uninterrupted / interrupted
 TestTaskUninterrupted():void=
     Log("a")

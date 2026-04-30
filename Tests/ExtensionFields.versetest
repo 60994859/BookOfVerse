@@ -10,6 +10,7 @@ assert_semantic_error(3101){(A:int, B:int).Method()<computes>:int=42}
 # Don't allow extension data members.
 assert_semantic_error(3502){(I:int).Member:int=I}
 assert_semantic_error(3502){(A:int, B:int).Member:int=I}
+assert_semantic_error(3502){int.Member:int=22}
 
 # Basic use tests.
 assert_valid{(I:int).Method()<computes>:int=I; F(I:int):int=I.Method()}

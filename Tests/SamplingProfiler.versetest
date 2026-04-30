@@ -1,0 +1,50 @@
+# Copyright Epic Games, Inc. All Rights Reserved.
+# Run with --test-profiler --test-profiler-filter=Sampling to run just these tests with the sampler
+
+using { /Verse.org/Tests/VerseTestScriptCmd }
+
+verse_vm_only {
+
+int_ref := class:
+    var Contents:int = 0
+
+SamplerNoOp()<suspends>:void = {}
+
+SamplerVerseLoop(Out:int_ref)<suspends>:void =
+    var Accum:int = 0
+    for (K := 1..100000):
+        set Accum = Accum + K
+    set Out.Contents = Accum
+
+SamplerVerseSyncRunner(Out:int_ref)<suspends>:void =
+    sync:
+        SamplerVerseLoop(Out)
+        SamplerNoOp()
+
+# Non-native loop in a sync: samples from SamplerVerseLoop should include SamplerVerseSyncRunner
+assert:
+    X := int_ref{}
+    spawn:
+        SamplerVerseSyncRunner(X)
+    X.Contents > 0
+
+SamplerNativeWork(N:int)<transacts>:int = N
+
+SamplerNativeLoop(Out:int_ref)<suspends>:void =
+    var Total:int = 0
+    for (K := 1..100000):
+        set Total = Total + FunctionUtils.Invoke(SamplerNativeWork, 1)
+    set Out.Contents = Total
+
+SamplerNativeSpawnRunner(Out:int_ref)<suspends>:void =
+    spawn:
+        SamplerNativeLoop(Out)
+
+# Native loop in a spawn: samples from SamplerNativeLoop should include SamplerNativeSpawnRunner
+assert:
+    X := int_ref{}
+    spawn:
+        SamplerNativeSpawnRunner(X)
+    X.Contents > 0
+
+}

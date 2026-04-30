@@ -19,22 +19,30 @@ assert:
     #     appears in another global in the same module)
 
     V1_A_Name := GetUObjectPathName(Globals.V1)
-    Check(Globals.V1, "/Engine/Transient.Default__TestSubobjectRenaming_Globals:__verse_0xECBAFCBE_V1")
+    Check(Globals.V1, "/Engine/_Verse/VNI/VerseTestScriptCmd.Default__TestSubobjectRenaming_Globals:__verse_0xECBAFCBE_V1")
     # make sure that a subobject of an object encountered during renaming is not renamed
     V1_A_Name = GetUObjectPathName(Globals.V1)
 
-    Check(Globals.A1[0], "/Engine/Transient.Default__TestSubobjectRenaming_Globals:__verse_0xDE8282C8_A1___verse_0xDE8282C8_A1")
-    Check(Globals.V2, "/Engine/Transient.Default__TestSubobjectRenaming_Globals:__verse_0xDE8282C8_A1_2___verse_0xDE8282C8_A1")
-    Check(Globals.A1[1], "/Engine/Transient.Default__TestSubobjectRenaming_Globals:__verse_0xDE8282C8_A1_2___verse_0xDE8282C8_A1")
+    Check(Globals.A1[0], "/Engine/_Verse/VNI/VerseTestScriptCmd.Default__TestSubobjectRenaming_Globals:__verse_0xDE8282C8_A1___verse_0xDE8282C8_A1")
+    Check(Globals.V2, "/Engine/_Verse/VNI/VerseTestScriptCmd.Default__TestSubobjectRenaming_Globals:__verse_0xDE8282C8_A1_2___verse_0xDE8282C8_A1")
+    Check(Globals.A1[1], "/Engine/_Verse/VNI/VerseTestScriptCmd.Default__TestSubobjectRenaming_Globals:__verse_0xDE8282C8_A1_2___verse_0xDE8282C8_A1")
 
-    Check(Globals.M1[2], "/Engine/Transient.Default__TestSubobjectRenaming_Globals:__verse_0x91972D9F_M1_Value___verse_0x91972D9F_M1")
-    Check(Globals.M1[42], "/Engine/Transient.Default__TestSubobjectRenaming_Globals:__verse_0x91972D9F_M1_1_Value___verse_0x91972D9F_M1")
+    Check(Globals.M1[2], "/Engine/_Verse/VNI/VerseTestScriptCmd.Default__TestSubobjectRenaming_Globals:__verse_0x91972D9F_M1_Value___verse_0x91972D9F_M1")
+    Check(Globals.M1[42], "/Engine/_Verse/VNI/VerseTestScriptCmd.Default__TestSubobjectRenaming_Globals:__verse_0x91972D9F_M1_1_Value___verse_0x91972D9F_M1")
 
-    Check(Globals.V4, "/Engine/Transient.Default__TestSubobjectRenaming_Globals:__verse_0xEC9008DD_O1___verse_0xEC9008DD_O1")
-    Check(Globals.O1?, "/Engine/Transient.Default__TestSubobjectRenaming_Globals:__verse_0xEC9008DD_O1___verse_0xEC9008DD_O1")
-    Check(Globals.O2?, "/Engine/Transient.Default__TestSubobjectRenaming_Globals:__verse_0x023FBDCF_O2___verse_0x023FBDCF_O2")
+    Check(Globals.V4, "/Engine/_Verse/VNI/VerseTestScriptCmd.Default__TestSubobjectRenaming_Globals:__verse_0xEC9008DD_O1___verse_0xEC9008DD_O1")
+    Check(Globals.O1?, "/Engine/_Verse/VNI/VerseTestScriptCmd.Default__TestSubobjectRenaming_Globals:__verse_0xEC9008DD_O1___verse_0xEC9008DD_O1")
+    Check(Globals.O2?, "/Engine/_Verse/VNI/VerseTestScriptCmd.Default__TestSubobjectRenaming_Globals:__verse_0x023FBDCF_O2___verse_0x023FBDCF_O2")
 
-    Check(Globals.V5, "/Engine/Transient.Default__TestSubobjectRenaming_Globals:__verse_0xC62DB978_MA1_1_Value___verse_0xC62DB978_MA1_1___verse_0xC62DB978_MA1")
+    Check(Globals.V5, "/Engine/_Verse/VNI/VerseTestScriptCmd.Default__TestSubobjectRenaming_Globals:__verse_0xC62DB978_MA1_1_Value___verse_0xC62DB978_MA1_1___verse_0xC62DB978_MA1")
 
-    Check(SomeOtherModule.SomeArray[0], "/Engine/Transient.Default__TestSubobjectRenaming_Globals:__verse_0xDE8282C8_A1_2___verse_0xDE8282C8_A1")
+    Check(SomeOtherModule.SomeArray[0], "/Engine/_Verse/VNI/VerseTestScriptCmd.Default__TestSubobjectRenaming_Globals:__verse_0xDE8282C8_A1_2___verse_0xDE8282C8_A1")
 }
+
+# No data or function definitions in this module,
+# but a name that collides case-insensitively with the non-class type below.
+
+CaseCollision := module:
+    some_class := class:
+
+casecollision := struct:

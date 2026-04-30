@@ -10,9 +10,14 @@ assert_semantic_error(3512):
 assert_semantic_error(3502):
     F(X:int, Xs:[]int)<decides>:int = first(I->Y:Xs; X = Y)
 
-# Not yet
-assert_semantic_error(3605):
-    F(X:int, Xs:[]int)<decides>:int = first{I->Y:Xs; X = Y; I}
+# Brace-only first: first{I->Y:Xs; X = Y; I} desugars to first(I->Y:Xs; X = Y){I}
+FirstPosBrace(X:int, Xs:[]int)<transacts><decides>:int =
+    first{I->Y:Xs; X = Y; I}
+
+assert:
+    not FirstPosBrace[1, array{}]
+    FirstPosBrace[2,array{1,2,3}] = 1
+    not FirstPosBrace[4,array{1,2,3}]
 
 # Only allow expressions that can fail (same as `for`)
 assert_semantic_error(3513):
@@ -153,9 +158,26 @@ assert:
     A:value = value{}
     Result:[]int = for (X:=1..3; var live B:int = 10*X+A.V; A.Set[X]; B = 10*X+X):
                         B
-    Result = array{11,22,33}               
+    Result = array{11,22,33}
 }
 
+# Brace-only first syntax tests
 
+# first{X:C; X>0} finds first matching value
+assert:
+    Xs := array{-3, -1, 5, 2}
+    5 = first{X:Xs; X>0}
 
+# first with definition as last expression
+assert:
+    Xs := array{1, 2, 3, 4, 5}
+    40 = first{X:Xs; X > 3; Z:=X*10}
 
+# first{I->X:Xs} - pair iteration, body is X
+assert:
+    20 = first{I->X:array{10,20,30}; X > 15}
+
+# Comma is not the same as semicolon
+assert:
+    12 = first{X:=1..5; 3*X>10}
+    (4,12) = first{X:=1..5, 3*X>10}

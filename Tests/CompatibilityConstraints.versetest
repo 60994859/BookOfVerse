@@ -2140,3 +2140,19 @@ assert_semantic_error(3506):
             using {/Verse.org/VerseTests/Module0/A}
             Main():void =
                 B()
+
+assert_valid:
+    vpackage(P0,/Verse.org/A, ?Role:=Source, ?Scope:=InternalAPI):
+        snippet:
+            using { /Verse.org/Native }
+            class1<public> := class:
+                @available{MinUploadedAtFNVersion := 4020}
+                Data1<public>:int
+                @available{MinUploadedAtFNVersion := 4020}
+                Method1<public>():int = 1
+    vpackage(P1,/B, ?Role:=PersistenceCompatConstraint, ?Scope:=InternalUser, ?Dependencies:=(P0), ?UploadedAtFNVersion:=3700):
+        snippet:
+            using {/Verse.org/A}
+            class2<public> := class(class1):
+                Data1<public>:float
+                Method1<public>():float = 1.0

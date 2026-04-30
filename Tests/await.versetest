@@ -17,6 +17,11 @@ assert_semantic_error(3512):
         await{F()}
 
 assert_semantic_error(3512):
+    F()<computes><reads><suspends>:void = {}
+    Main()<suspends>:void =
+        await{branch{F()}}
+
+assert_semantic_error(3512):
     F()<computes><writes>:void = {}
     Main()<suspends>:void =
         await{F()}
@@ -121,9 +126,10 @@ assert:
     Y.Contents = 0
 
 Transaction := module:
-    F<public>(X:int_ref, Y:int_ref)<suspends>:void =
+    F<public>(X:int_ref, Y:int_ref)<suspends>:int =
         await{X.Contents}
         set Y.Contents = 1
+        X.Contents
 
 assert:
     X := int_ref{}
@@ -144,6 +150,18 @@ assert:
         set X.Contents = 2
         false?
     Y.Contents = 0
+
+assert:
+    X := int_ref{}
+    Y := int_ref{}
+    spawn:
+        Transaction.F(X, Y)
+    if:
+        set X.Contents = 2
+        false?
+    Y.Contents = 0
+    set X.Contents = 3
+    Y.Contents = 1
 
 SuspendInsideTransaction := module:
     F<public>(X:int_ref, Y:int_ref)<suspends>:void =

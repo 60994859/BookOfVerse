@@ -4,5 +4,5 @@
 # This meant you could create global variables by inheriting from an interface.
 # Post-40.00, the allocates effect is allowed at module scope, but allocating a variable at module scope causes a runtime error.
 # We need to suppress that for variables defined in interfaces defined in pre-40.00 uploads.
-assert_link_error()        {vpackage(P, /A, ?UploadedAtFNVersion:=3999){snippet{i := interface<allocates>{var X:int = 0}; c := class<allocates>(i){}; M:=module{Instance:c = c{}}}}}
+assert_link_valid()        {vpackage(P, /A, ?UploadedAtFNVersion:=3999){snippet{i := interface<allocates>{var X:int = 0}; c := class<allocates>(i){}; M:=module{Instance:c = c{}}}}}
 assert_link_error(9003)    {vpackage(P, /A, ?UploadedAtFNVersion:=4000){snippet{i := interface<allocates>{var X:int = 0}; c := class<allocates>(i){}; M:=module{Instance:c = c{}}}}}

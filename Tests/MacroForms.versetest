@@ -23,7 +23,7 @@ assert_semantic_error(3532, 3532, 3532){ f(xs:[]int):void={  for(x:xs;x:xs;x:xs)
 
 # This error is not great; ideally, we would say something about too many clauses in call to
 # macro 'for'
-assert_semantic_error(3605){ f(xs:[]int):void={  for{x:xs}{}  } }
+assert_semantic_error(3545){ f(xs:[]int):void={  for{x:xs}{}  } }
 
 assert_syntax_error(3100){ "f(xs:[]int):void=\{  for(x:xs) of\{\} do\{\}  \}" }
 assert_semantic_error(3559){ x:logic=logic{1<2}do{q:=1} }

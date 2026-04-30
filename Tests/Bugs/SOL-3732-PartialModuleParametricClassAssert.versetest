@@ -2,7 +2,7 @@
 
 bp_vm_only
 {
-assert_link_error():
+assert_link_valid():
     vpackage(P0,/M,?Scope:=InternalAPI):
         snippet:
             c1<public>(t:type) := class{}

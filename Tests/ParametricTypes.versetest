@@ -1383,3 +1383,31 @@ parametric_class_with_inherited_fields(t:type) := class(parametric_interface_wit
 assert{Instance:=parametric_class_with_fields(int)          {X:=10}; Instance.X = Instance.GetX()}
 assert{Instance:=parametric_interface_with_fields(int)      {X:=10}; Instance.X = Instance.GetX()}
 assert{Instance:=parametric_class_with_inherited_fields(int){X:=10}; Instance.X = Instance.GetX()}
+
+assert_valid:
+    vpackage(P0, /Verse.org/VerseTests/Module, ?Role := Source, ?Scope := InternalUser, ?UploadedAtFNVersion := 3900):
+        snippet:
+            A()<decides>:false =
+                false?
+                A[]
+            B()<decides> := A[]
+
+assert_semantic_error(3502, 3512):
+    vpackage(P0, /Verse.org/VerseTests/Module, ?Role := Source, ?Scope := InternalUser, ?UploadedAtFNVersion := 4000):
+        snippet:
+            A()<decides>:false =
+                false?
+                A[]
+            B()<decides> := A[]
+
+assert_valid:
+    vpackage(P0, /Verse.org/VerseTests/Module, ?Role := Source, ?Scope := InternalUser, ?UploadedAtFNVersion := 3900):
+        snippet:
+            class1(t:type)<computes> := class {}
+            X:class1(int) = class1(int) {}
+
+assert_semantic_error(3502, 3512):
+    vpackage(P0, /Verse.org/VerseTests/Module, ?Role := Source, ?Scope := InternalUser, ?UploadedAtFNVersion := 4000):
+        snippet:
+            class1(t:type)<computes> := class {}
+            X:class1(int) = class1(int) {}

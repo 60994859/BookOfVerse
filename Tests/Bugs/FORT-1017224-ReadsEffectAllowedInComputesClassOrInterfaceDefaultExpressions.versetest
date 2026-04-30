@@ -1,8 +1,6 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
-# Test that module-scope data initializers are allowed to have reads effect between 37.00 and pre-39.10, but disallowed after.
-
-assert_semantic_error(3512):
+assert_valid:
     vpackage(P, /A, ?UploadedAtFNVersion:=3699):
         snippet:
             # Use an optional instance of an abstract class to define an abstract converges method we can use to test whether reads is allowed
@@ -25,7 +23,7 @@ assert_valid:
             X:void = option{MaybeInstance?.Read()}
 
 assert_semantic_error(3512):
-    vpackage(P, /A, ?UploadedAtFNVersion:=3910):
+    vpackage(P, /A, ?UploadedAtFNVersion:=4000):
         snippet:
             # Use an optional instance of an abstract class to define an abstract converges method we can use to test whether reads is allowed
             # in contexts that otherwise require converges.
@@ -40,13 +38,13 @@ assert_semantic_error(3512):
 # Instead we test <writes> and <allocates>
 
 assert_valid               {vpackage(P, /A, ?UploadedAtFNVersion:=3909){snippet{abstract_class := class<abstract>{Read()<reads><converges>:void}; MaybeInstance:?abstract_class = false; test_class := class{X:void=option{MaybeInstance?.Read()}}}}}
-assert_valid               {vpackage(P, /A, ?UploadedAtFNVersion:=3910){snippet{abstract_class := class<abstract>{Read()<reads><converges>:void}; MaybeInstance:?abstract_class = false; test_class := class{X:void=option{MaybeInstance?.Read()}}}}}
+assert_valid               {vpackage(P, /A, ?UploadedAtFNVersion:=4000){snippet{abstract_class := class<abstract>{Read()<reads><converges>:void}; MaybeInstance:?abstract_class = false; test_class := class{X:void=option{MaybeInstance?.Read()}}}}}
 
 assert_valid               {vpackage(P, /A, ?UploadedAtFNVersion:=3909){snippet{abstract_class := class<abstract>{Read()<reads><converges>:void}; MaybeInstance:?abstract_class = false; test_class := class<reads>{X:void=option{MaybeInstance?.Read()}}}}}
-assert_valid               {vpackage(P, /A, ?UploadedAtFNVersion:=3910){snippet{abstract_class := class<abstract>{Read()<reads><converges>:void}; MaybeInstance:?abstract_class = false; test_class := class<reads>{X:void=option{MaybeInstance?.Read()}}}}}
+assert_valid               {vpackage(P, /A, ?UploadedAtFNVersion:=4000){snippet{abstract_class := class<abstract>{Read()<reads><converges>:void}; MaybeInstance:?abstract_class = false; test_class := class<reads>{X:void=option{MaybeInstance?.Read()}}}}}
 
 assert_valid               {vpackage(P, /A, ?UploadedAtFNVersion:=3909){snippet{abstract_class := class<abstract>{Read()<reads><converges>:void}; MaybeInstance:?abstract_class = false; test_class := class<writes>{X:void=option{MaybeInstance?.Read()}}}}}
-assert_semantic_error(3512){vpackage(P, /A, ?UploadedAtFNVersion:=3910){snippet{abstract_class := class<abstract>{Read()<reads><converges>:void}; MaybeInstance:?abstract_class = false; test_class := class<writes>{X:void=option{MaybeInstance?.Read()}}}}}
+assert_semantic_error(3512){vpackage(P, /A, ?UploadedAtFNVersion:=4000){snippet{abstract_class := class<abstract>{Read()<reads><converges>:void}; MaybeInstance:?abstract_class = false; test_class := class<writes>{X:void=option{MaybeInstance?.Read()}}}}}
 
 assert_valid               {vpackage(P, /A, ?UploadedAtFNVersion:=3909){snippet{abstract_class := class<abstract>{Read()<reads><converges>:void}; MaybeInstance:?abstract_class = false; test_class := class<allocates>{X:void=option{MaybeInstance?.Read()}}}}}
-assert_semantic_error(3512){vpackage(P, /A, ?UploadedAtFNVersion:=3910){snippet{abstract_class := class<abstract>{Read()<reads><converges>:void}; MaybeInstance:?abstract_class = false; test_class := class<allocates>{X:void=option{MaybeInstance?.Read()}}}}}
+assert_semantic_error(3512){vpackage(P, /A, ?UploadedAtFNVersion:=4000){snippet{abstract_class := class<abstract>{Read()<reads><converges>:void}; MaybeInstance:?abstract_class = false; test_class := class<allocates>{X:void=option{MaybeInstance?.Read()}}}}}
