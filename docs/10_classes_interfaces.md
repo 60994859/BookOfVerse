@@ -303,12 +303,12 @@ character := class:
         LogCharacterAction(Self, "announced")
 
 
-    SetOption(Key:string, Value:string):builder =
+    SetOption(Key:string, Value:string):character =
         set Config[Key] = Value
         Self  # Return this instance for method chaining
 
 
-    SetName(NewName:stirng):void =
+    SetName(NewName:string):void =
        set Self.Name = NewName	  # Set the name of this instance
 	   Self.Announce()            # Call a method of this instance
 ```
