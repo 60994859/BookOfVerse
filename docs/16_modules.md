@@ -949,19 +949,22 @@ This limitation may be lifted in future versions to support more complex scoping
 
 ## Automatic Qualification
 
+!!! warning "Unreleased Feature"
+    Automatic qualification has not yet been fully implemented. This section documents planned functionality that is not currently available. The behavior described here, particularly regarding how the compiler transforms identifiers in published code, should not be relied upon until officially released.
+
 When you write Verse code, you use simple, unqualified identifiers for
-clarity and readability. However, the Verse compiler internally
-transforms all identifiers into fully-qualified forms that explicitly
+clarity and readability. However, the Verse compiler will internally
+transform all identifiers into fully-qualified forms that explicitly
 specify their scope and origin. This process, called **automatic
-qualification**, ensures that every identifier is unambiguous and can
+qualification**, will ensure that every identifier is unambiguous and can
 be resolved to exactly one definition.
 
-Understanding automatic qualification helps you understand how Verse
-resolves names, why certain errors occur, and how the module system
-maintains correctness even in complex codebases with many modules and
+Understanding automatic qualification will help you understand how Verse
+will resolve names, why certain errors occur, and how the module system
+will maintain correctness even in complex codebases with many modules and
 overlapping names.
 
-The compiler qualifies several categories of identifiers:
+The compiler will qualify several categories of identifiers:
 
 1. **Top-level definitions** - Functions, variables, classes, modules at package scope
 2. **Type references** - All types, including built-in types like `int` and `string`
@@ -1059,7 +1062,7 @@ When you write `X:int`, the compiler expands it to `X:(/Verse.org/Verse:)int`, m
 
 ### Example
 
-Here's a more realistic example showing how qualification works across multiple scopes:
+Here's a more realistic example showing how qualification would work across multiple scopes:
 
 <!--NoCompile-->
 ```verse
@@ -1073,7 +1076,7 @@ GameSystem := module:
         Calculate(Input:int):int =
             Input * Multiplier + BaseValue
 
-# How the compiler sees it:
+# How the compiler will see it (when implemented):
 (/YourGame:)GameSystem := module:
     (/YourGame/GameSystem:)BaseValue:(/Verse.org/Verse:)int = 42
 
@@ -1090,6 +1093,18 @@ Notice how:
 - `Multiplier` is qualified with its containing module path
 - `BaseValue` is qualified with the outer module path
 - All type references are qualified with the Verse standard library path
+
+**Important Note on Shadowing**: Automatic qualification will only apply to published code, not your source code. Verse currently enforces strict anti-shadowing rules to prevent confusion and maintain code clarity. For example, this code does **not** compile:
+
+<!--NoCompile-->
+```verse
+# This does NOT compile - shadowing is not allowed
+Thing := module:
+    Thing := module:  # ERROR: Cannot shadow outer Thing
+        Potato := module{}
+```
+
+Even with automatic qualification, nested definitions cannot shadow outer definitions with the same name. If you want to intentionally shadow something, you must use explicit qualifiers to make your intent clear. This strict approach helps prevent bugs and makes code evolution safer.
 
 ### Qualification with Using
 
@@ -1114,9 +1129,9 @@ The compiler resolves `GetRandomFloat` to `(/Verse.org/Random:)GetRandomFloat` b
 
 ### When It Matters
 
-You rarely need to think about automatic or manual qualification during normal
-development, as the compiler handles it transparently. However,
-understanding it helps in several situations:
+Once implemented, you will rarely need to think about automatic or manual qualification during normal
+development, as the compiler will handle it transparently. However,
+understanding it will help in several situations:
 
 **Debugging name resolution errors**: When the compiler reports
 ambiguous or unresolved identifiers, understanding qualification helps
