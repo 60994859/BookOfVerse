@@ -776,7 +776,7 @@ if (not NumArray.Insert[NumArray.Length + 1, array{5}]):
     # Beyond Length fails
 ```
 
-The `Concatenate()` function is a variadic intrinsic that combines any number of arrays into one:
+The `Concatenate()` function combines an array of arrays into a single flat array:
 
 <!--versetest
 M():void =
@@ -785,11 +785,11 @@ M():void =
 -->
 <!-- 44 -->
 ```verse
-Concatenate(Arrays:[]t...):[]t
+Concatenate(Arrays:[][]t):[]t
 ```
 <!-- #> -->
 
-Unlike the `+` operator which joins exactly two arrays, `Concatenate()` accepts zero, two, or more arrays (but not one array):
+Thanks to tuple-to-array coercion, you can pass multiple array arguments directly and they are automatically gathered into the array-of-arrays parameter. Unlike the `+` operator which joins exactly two arrays, `Concatenate()` accepts any number of array arguments:
 
 <!--versetest-->
 <!-- 45 -->
@@ -798,10 +798,9 @@ Unlike the `+` operator which joins exactly two arrays, `Concatenate()` accepts 
 Empty := Concatenate()
 Empty = array{}
 
-# Single array does not work - use the identity operation or + with empty array instead
-# Single := Concatenate(array{1, 2, 3})  # Does not compile
-Single := array{1, 2, 3}  # Just use the array directly
-Alternative := array{1, 2, 3} + array{}  # Or concatenate with empty array
+# Single array passed as an array-of-arrays
+Single := Concatenate(array{array{1, 2, 3}})
+Single = array{1, 2, 3}
 
 # Two arrays
 TwoArrays := Concatenate(array{1, 2}, array{3, 4})
@@ -839,7 +838,7 @@ Second := array{3, 4}
 Third := array{5, 6}
 ChainedResult := First + Second + Third  # Works but requires multiple operations
 
-# Using Concatenate (variadic)
+# Using Concatenate
 ConcatenatedResult := Concatenate(First, Second, Third)  # Single operation
 
 ChainedResult = ConcatenatedResult
@@ -1208,7 +1207,7 @@ Maps can be used as keys of other maps if all values and keys from it are compar
 
 ### Concatenating Maps
 
-The `ConcatenateMaps()` function merges multiple maps into a single map, similar to how `Concatenate()` combines arrays:
+The `ConcatenateMaps()` function merges two maps into a single map:
 
 <!--versetest
 M():void =
@@ -1219,29 +1218,25 @@ M():void =
 -->
 <!-- 64 -->
 ```verse
-ConcatenateMaps(Maps:[]map(k,v)...):map(k,v)
+ConcatenateMaps(Map1:[k]v, Map2:[k]v):[k]v
 ```
 <!-- #> -->
 
-`ConcatenateMaps()` is variadic—it accepts two or more maps and combines them into one. When maps contain duplicate keys, values from **later** maps override values from earlier ones:
+`ConcatenateMaps()` takes exactly two maps and combines them into one. When maps contain duplicate keys, values from the **second** map override values from the first:
 
 <!--versetest-->
 <!-- 65 -->
 ```verse
-<#
-Map1 := map{1 => "one", 2 => "two"}
-Map2 := map{3 => "three", 4 => "four"}
-Map3 := map{5 => "five"}
-
-Combined := ConcatenateMaps(Map1, Map2, Map3)
-# Combined is map{1 => "one", 2 => "two", 3 => "three", 4 => "four", 5 => "five"}
-#>
-# Test with two maps since three causes type inference issues
 Map1 := map{1 => "one", 2 => "two"}
 Map2 := map{3 => "three", 4 => "four"}
 
 Combined := ConcatenateMaps(Map1, Map2)
 Combined = map{1 => "one", 2 => "two", 3 => "three", 4 => "four"}
+
+# To merge more than two maps, chain calls
+Map3 := map{5 => "five"}
+All := ConcatenateMaps(ConcatenateMaps(Map1, Map2), Map3)
+All = map{1 => "one", 2 => "two", 3 => "three", 4 => "four", 5 => "five"}
 ```
 
 **Handling duplicate keys:**
@@ -1264,21 +1259,7 @@ The right-to-left precedence ensures that later maps take priority, enabling a n
 <!--versetest-->
 <!-- 67 -->
 ```verse
-<#
 # Empty maps contribute nothing
-FirstMap := map{1 => "a"}
-EmptyMap := map{}
-SecondMap := map{2 => "b"}
-
-Combined := ConcatenateMaps(FirstMap, EmptyMap, SecondMap)  # map{1 => "a", 2 => "b"}
-
-# Concatenating only empty maps produces an empty map
-AllEmpty := ConcatenateMaps(map{}, map{}, map{})  # map{}
-
-# Single map returns that map
-Single := ConcatenateMaps(map{1 => "one"})  # map{1 => "one"}
-#>
-# Test with two maps (three causes type inference issues)
 FirstMap := map{1 => "a"}
 EmptyMap : [int]string = map{}
 
@@ -1293,23 +1274,7 @@ The resulting map type will coerce to the most specific shared type from the inp
 <!--versetest-->
 <!-- 68 -->
 ```verse
-<#
-# All maps have same types
-FirstMap := map{1 => "a"}
-SecondMap := map{2 => "b"}
-Combined := ConcatenateMaps(FirstMap, SecondMap)  # [int]string
-
-# Maps with different types
-IntKeys := map{1 => "a"}
-StringKeys := map{"string" => "b"}
-MixedKeys := ConcatenateMaps(IntKeys, StringKeys)  # [comparable]string
-
-# Mismatched key and value types
-IntMap := map{1 => "a"}        # [int]string
-RationalMap := map{5 / 3 => "b"} # [rational]string
-WidenedKeys := ConcatenateMaps(IntMap, RationalMap) # [rational]string
-#>
-# Test that maps with same types can be concatenated
+# Maps with the same key and value types
 FirstMap := map{1 => "a"}
 SecondMap := map{2 => "b"}
 Combined := ConcatenateMaps(FirstMap, SecondMap)
