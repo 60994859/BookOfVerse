@@ -314,7 +314,152 @@ git config --unset https.proxy
 
 如果你确实需要代理访问 GitHub，建议配置 Git 支持的 HTTP/HTTPS 代理，而不是在当前 Git Credential Manager 流程中使用 `socks5`。
 
-## 11. 常用命令速查
+## 11. 在 VS Code 中操作 Git
+
+如果你平时习惯在 VS Code 中操作 Git，可以继续使用 VS Code 的 Source Control 面板。只要远端仍保持：
+
+```text
+origin   你的仓库
+upstream 官方仓库
+```
+
+VS Code 中的日常提交和同步也不会影响官方仓库。
+
+### 11.1 提交并推送到自己的仓库
+
+日常修改后：
+
+1. 打开 VS Code 左侧的 **Source Control** 面板。
+2. 在变更文件列表中确认要提交的文件。
+3. 点击文件旁边的 `+`，或点击 **Stage All Changes** 暂存全部改动。
+4. 在消息框中输入提交说明。
+5. 点击 **Commit**。
+6. 点击 **Sync Changes** 或 **Push**。
+
+因为本地 `main` 分支跟踪的是 `origin/main`，所以 VS Code 的 **Push** / **Sync Changes** 会推送到你的仓库：
+
+```text
+https://github.com/60994859/BookOfVerse.git
+```
+
+不会推送到官方仓库。
+
+### 11.2 在 VS Code 中拉取官方更新
+
+VS Code 的默认 **Pull** 通常是从当前分支的跟踪远端拉取，也就是 `origin/main`。这只会拉你自己仓库的更新，不会拉官方 `upstream/main`。
+
+要拉取官方最新更新，推荐使用 VS Code 内置终端执行：
+
+```powershell
+git fetch upstream
+git merge upstream/main
+```
+
+操作位置：
+
+1. 在 VS Code 中打开项目目录。
+2. 打开菜单 **Terminal -> New Terminal**。
+3. 在终端执行：
+
+```powershell
+git fetch upstream
+git merge upstream/main
+```
+
+合并成功后，再在 VS Code Source Control 面板中查看变更。如果合并产生了新的 commit 或文件变化，最后点击 **Push** / **Sync Changes** 上传到你自己的 `origin/main`。
+
+### 11.3 使用 VS Code 命令面板
+
+也可以通过命令面板执行部分 Git 操作：
+
+1. 按 `Ctrl+Shift+P`。
+2. 输入 `Git:`。
+3. 选择需要的 Git 命令。
+
+适合日常使用的命令：
+
+```text
+Git: Commit
+Git: Push
+Git: Pull
+Git: Fetch
+Git: Sync
+```
+
+但要注意：VS Code 命令面板里的 **Git: Pull** 默认不会指定 `upstream/main`。如果你的目标是拉官方更新，仍建议用终端明确执行：
+
+```powershell
+git fetch upstream
+git merge upstream/main
+```
+
+### 11.4 在 VS Code 中处理冲突
+
+如果合并官方更新时出现冲突，VS Code 会在 Source Control 面板中显示冲突文件。
+
+打开冲突文件后，VS Code 通常会显示几个按钮：
+
+```text
+Accept Current Change
+Accept Incoming Change
+Accept Both Changes
+Compare Changes
+```
+
+含义：
+
+1. **Current Change**：你本地当前分支的内容。
+2. **Incoming Change**：从 `upstream/main` 合并进来的官方内容。
+3. **Accept Both Changes**：同时保留两边内容，通常还需要手动整理。
+4. **Compare Changes**：对比两边差异。
+
+处理建议：
+
+1. 不要无脑点击 **Accept Incoming Change**，否则可能丢掉你的中文化改动。
+2. 不要无脑点击 **Accept Current Change**，否则可能丢掉官方更新。
+3. 对文档文件，通常需要人工合并英文官方更新和你的中文目录/构建脚本改动。
+4. 冲突标记全部清理后，保存文件。
+5. 回到 Source Control 面板暂存冲突文件。
+6. 提交 merge commit。
+7. 点击 **Push** 上传到自己的仓库。
+
+### 11.5 VS Code 中要避免的操作
+
+避免在不确定时使用这些操作：
+
+```text
+Discard Changes
+Discard All Changes
+Reset
+Force Push
+Push to...
+```
+
+尤其注意：
+
+1. **Discard Changes** 会丢弃本地文件改动。
+2. **Reset** 可能移动分支指针，处理不当会让提交消失。
+3. **Force Push** 会强制覆盖远端历史，日常不要使用。
+4. **Push to...** 如果选错远端，理论上可能尝试推送到 `upstream`。
+
+日常最安全的 VS Code 操作组合是：
+
+```text
+Source Control 面板提交 -> Push/Sync 到 origin
+VS Code 终端执行 git fetch upstream + git merge upstream/main 拉官方
+```
+
+### 11.6 VS Code 操作口诀
+
+```text
+提交和推送：用 Source Control 面板，推到 origin
+拉官方更新：用 VS Code 终端，fetch/merge upstream
+处理冲突：用 VS Code 冲突编辑器，人工确认
+不要强推：不要 Force Push
+不要推官方：不要 Push to upstream
+```
+
+## 12. 常用命令速查
 
 查看当前状态：
 
@@ -360,7 +505,7 @@ git remote -v
 git branch -vv
 ```
 
-## 12. 推荐工作习惯
+## 13. 推荐工作习惯
 
 1. 日常只对 `origin` push。
 2. 只从 `upstream` fetch/merge，不向 `upstream` push。
