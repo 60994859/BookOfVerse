@@ -284,7 +284,107 @@ tmp/
 node_modules/
 ```
 
-## 10. 代理问题
+## 10. 部署 GitHub Pages 网站
+
+本仓库已经配置了 GitHub Actions 自动部署双语网站到 GitHub Pages。
+
+部署 workflow 文件：
+
+```text
+.github/workflows/deploy.yml
+```
+
+公网访问地址：
+
+```text
+https://60994859.github.io/BookOfVerse/
+https://60994859.github.io/BookOfVerse/zh/
+https://60994859.github.io/BookOfVerse/en/
+```
+
+### 10.1 自动部署
+
+每次你把 `main` 分支 push 到自己的仓库后，GitHub 会自动部署网站：
+
+```powershell
+git push
+```
+
+或明确写成：
+
+```powershell
+git push origin main
+```
+
+部署流程会自动执行：
+
+1. 安装 Python。
+2. 构建双语 MkDocs 网站。
+3. 上传 `site/` 目录为 GitHub Pages artifact。
+4. 发布到 GitHub Pages。
+
+### 10.2 手动重新部署
+
+如果想不提交新代码、只重新运行部署：
+
+1. 打开 GitHub 仓库页面。
+2. 进入 **Actions**。
+3. 选择 **Deploy bilingual MkDocs to GitHub Pages**。
+4. 点击 **Run workflow**。
+5. 选择 `main` 分支并运行。
+
+也可以打开最近一次失败或成功的 workflow，点击 **Re-run jobs**。
+
+### 10.3 查看部署状态
+
+查看部署是否成功：
+
+1. 打开 GitHub 仓库页面。
+2. 进入 **Actions**。
+3. 查看 **Deploy bilingual MkDocs to GitHub Pages** 的最新运行。
+
+成功时通常会看到：
+
+```text
+build   Succeeded
+deploy  Succeeded
+```
+
+失败时点击失败的 job，展开日志看具体原因。
+
+### 10.4 GitHub Pages 设置
+
+如果部署报错提示 Pages 未启用，需要在 GitHub 网页确认：
+
+```text
+Settings -> Pages -> Build and deployment -> Source -> GitHub Actions
+```
+
+这个设置只需要做一次。设置完成后，重新运行 workflow 即可。
+
+### 10.5 部署内容来自哪里
+
+GitHub Pages 部署的不是仓库里的 `site/` 目录，因为 `site/` 是构建产物，默认不提交。
+
+部署时 GitHub Actions 会在云端重新执行：
+
+```powershell
+./scripts/build_local_site.ps1 -Python python
+```
+
+然后发布生成出来的：
+
+```text
+site/
+```
+
+也就是说，只要源码、中文译文、MkDocs 配置和构建脚本提交到了仓库，GitHub 就能自动生成网站。
+
+### 10.6 部署后需要等待
+
+GitHub Pages 成功部署后，公网访问可能需要几十秒到几分钟刷新。如果刚部署完访问旧页面，可以稍等一会儿，或强制刷新浏览器缓存。
+
+## 11. 代理问题
 
 当前仓库曾经配置过本地代理：
 
@@ -314,7 +414,7 @@ git config --unset https.proxy
 
 如果你确实需要代理访问 GitHub，建议配置 Git 支持的 HTTP/HTTPS 代理，而不是在当前 Git Credential Manager 流程中使用 `socks5`。
 
-## 11. 在 VS Code 中操作 Git
+## 12. 在 VS Code 中操作 Git
 
 如果你平时习惯在 VS Code 中操作 Git，可以继续使用 VS Code 的 Source Control 面板。只要远端仍保持：
 
@@ -325,7 +425,7 @@ upstream 官方仓库
 
 VS Code 中的日常提交和同步也不会影响官方仓库。
 
-### 11.1 提交并推送到自己的仓库
+### 12.1 提交并推送到自己的仓库
 
 日常修改后：
 
@@ -344,7 +444,7 @@ https://github.com/60994859/BookOfVerse.git
 
 不会推送到官方仓库。
 
-### 11.2 在 VS Code 中拉取官方更新
+### 12.2 在 VS Code 中拉取官方更新
 
 VS Code 的默认 **Pull** 通常是从当前分支的跟踪远端拉取，也就是 `origin/main`。这只会拉你自己仓库的更新，不会拉官方 `upstream/main`。
 
@@ -368,7 +468,7 @@ git merge upstream/main
 
 合并成功后，再在 VS Code Source Control 面板中查看变更。如果合并产生了新的 commit 或文件变化，最后点击 **Push** / **Sync Changes** 上传到你自己的 `origin/main`。
 
-### 11.3 使用 VS Code 命令面板
+### 12.3 使用 VS Code 命令面板
 
 也可以通过命令面板执行部分 Git 操作：
 
@@ -393,7 +493,7 @@ git fetch upstream
 git merge upstream/main
 ```
 
-### 11.4 在 VS Code 中处理冲突
+### 12.4 在 VS Code 中处理冲突
 
 如果合并官方更新时出现冲突，VS Code 会在 Source Control 面板中显示冲突文件。
 
@@ -423,7 +523,7 @@ Compare Changes
 6. 提交 merge commit。
 7. 点击 **Push** 上传到自己的仓库。
 
-### 11.5 VS Code 中要避免的操作
+### 12.5 VS Code 中要避免的操作
 
 避免在不确定时使用这些操作：
 
@@ -449,7 +549,7 @@ Source Control 面板提交 -> Push/Sync 到 origin
 VS Code 终端执行 git fetch upstream + git merge upstream/main 拉官方
 ```
 
-### 11.6 VS Code 操作口诀
+### 12.6 VS Code 操作口诀
 
 ```text
 提交和推送：用 Source Control 面板，推到 origin
@@ -459,7 +559,7 @@ VS Code 终端执行 git fetch upstream + git merge upstream/main 拉官方
 不要推官方：不要 Push to upstream
 ```
 
-## 12. 常用命令速查
+## 13. 常用命令速查
 
 查看当前状态：
 
@@ -505,7 +605,7 @@ git remote -v
 git branch -vv
 ```
 
-## 13. 推荐工作习惯
+## 14. 推荐工作习惯
 
 1. 日常只对 `origin` push。
 2. 只从 `upstream` fetch/merge，不向 `upstream` push。
