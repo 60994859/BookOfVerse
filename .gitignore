@@ -59,10 +59,17 @@ Desktop.ini
 htmlcov/
 archive/
 scripts/
+!scripts/
+!scripts/translate_docs_zh.py
+!scripts/repair_translation_structure.py
 
 # Temporary files
 *.tmp
 *.bak
 .temp/
+tmp/pdfs/
+tmp/site-src/
+output/pdf/
+node_modules/
 
 .claude

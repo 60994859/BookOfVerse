@@ -1,0 +1,88 @@
+site_name: Verse 编程语言之书
+site_url: http://127.0.0.1:8000/zh/
+site_description: Verse 编程语言中文文档
+site_author: Jan Vitek
+
+docs_dir: tmp/site-src/zh
+site_dir: site/zh
+
+theme:
+  name: material
+  logo: images/verse.svg
+  language: zh
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-7
+        name: 切换到亮色模式
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/brightness-2
+        name: 切换到暗色模式
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/brightness-auto
+        name: 跟随系统偏好
+  features:
+    - search.suggest
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.details
+  - footnotes
+
+plugins:
+  - search
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+      htmlmin_opts:
+        remove_comments: true
+
+extra:
+  alternate:
+    - name: English
+      link: /en/
+      lang: en
+    - name: 简体中文
+      link: /zh/
+      lang: zh
+
+extra_css:
+  - extra.css
+
+extra_javascript:
+  - type: module
+    path: js/Verse.js
+
+nav:
+  - 首页: index.md
+  - 概述: 00_overview.md
+  - 表达式: 01_expressions.md
+  - 基本数据类型: 02_primitives.md
+  - 容器类型: 03_containers.md
+  - 运算符: 04_operators.md
+  - 可变性: 05_mutability.md
+  - 函数: 06_functions.md
+  - 控制流: 07_control.md
+  - 失败: 08_failure.md
+  - 结构体和枚举: 09_structs_enums.md
+  - 类与接口: 10_classes_interfaces.md
+  - 类型: 11_types.md
+  - 访问说明符: 12_access.md
+  - 效果: 13_effects.md
+  - 并发: 14_concurrency.md
+  - 实时变量: 15_live_variables.md
+  - 模块: 16_modules.md
+  - 可持久化类型: 17_persistable.md
+  - Verse 代码演化与兼容性: 18_evolution.md
+  - 概念索引: concept_index.md
+  - "附录：Verse 语法验证": VerseSyntaxValidation.md

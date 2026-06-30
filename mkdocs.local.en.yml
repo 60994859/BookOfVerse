@@ -1,0 +1,88 @@
+site_name: Book of Verse
+site_url: http://127.0.0.1:8000/en/
+site_description: Documentation for the Verse programming language
+site_author: Jan Vitek
+
+docs_dir: tmp/site-src/en
+site_dir: site/en
+
+theme:
+  name: material
+  logo: images/verse.svg
+  language: en
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-7
+        name: Switch to Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/brightness-2
+        name: Switch to Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to System preference
+  features:
+    - search.suggest
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.details
+  - footnotes
+
+plugins:
+  - search
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+      htmlmin_opts:
+        remove_comments: true
+
+extra:
+  alternate:
+    - name: English
+      link: /en/
+      lang: en
+    - name: 简体中文
+      link: /zh/
+      lang: zh
+
+extra_css:
+  - extra.css
+
+extra_javascript:
+  - type: module
+    path: js/Verse.js
+
+nav:
+  - Home: index.md
+  - Overview: 00_overview.md
+  - Expressions: 01_expressions.md
+  - Primitives types: 02_primitives.md
+  - Containers types: 03_containers.md
+  - Operators: 04_operators.md
+  - Mutability: 05_mutability.md
+  - Functions: 06_functions.md
+  - Control Flow: 07_control.md
+  - Failure: 08_failure.md
+  - Structs & Enums: 09_structs_enums.md
+  - Classes & Interfaces: 10_classes_interfaces.md
+  - Type System: 11_types.md
+  - Access Specifiers: 12_access.md
+  - Effects: 13_effects.md
+  - Concurrency: 14_concurrency.md
+  - Live Variables: 15_live_variables.md
+  - Modules and Paths: 16_modules.md
+  - Persistable Types: 17_persistable.md
+  - Code Evolution: 18_evolution.md
+  - Concept Index: concept_index.md
+  - "Appendix: Verse Syntax Validation": VerseSyntaxValidation.md

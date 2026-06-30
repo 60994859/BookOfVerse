@@ -1,0 +1,2 @@
+# Dependencies used to assemble the Markdown sources into printable HTML.
+Markdown>=3.5,<4
