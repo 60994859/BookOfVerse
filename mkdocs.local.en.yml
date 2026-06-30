@@ -1,5 +1,5 @@
 site_name: Book of Verse
-site_url: http://127.0.0.1:8000/en/
+site_url: !ENV [SITE_URL_EN, "http://127.0.0.1:8000/en/"]
 site_description: Documentation for the Verse programming language
 site_author: Jan Vitek
 
@@ -50,10 +50,10 @@ plugins:
 extra:
   alternate:
     - name: English
-      link: /en/
+      link: !ENV [SITE_ALTERNATE_EN, "/en/"]
       lang: en
     - name: 简体中文
-      link: /zh/
+      link: !ENV [SITE_ALTERNATE_ZH, "/zh/"]
       lang: zh
 
 extra_css:

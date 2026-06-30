@@ -1,23 +1,48 @@
-name: Deploy MkDocs to GitHub Pages
+name: Deploy bilingual MkDocs to GitHub Pages
 
 on:
   push:
     branches:
-      - main          # Trigger on push to main branch
-  workflow_dispatch:  # Allow Manual Trigger
+      - main
+  workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true # Only deploy most recent version
+  cancel-in-progress: true
 
 jobs:
   build:
-    uses: ./.github/workflows/build.yml
-    permissions:
-      contents: read
-    with:
-      upload: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build bilingual MkDocs site
+        shell: pwsh
+        env:
+          SITE_URL_EN: https://60994859.github.io/BookOfVerse/en/
+          SITE_URL_ZH: https://60994859.github.io/BookOfVerse/zh/
+          SITE_ALTERNATE_EN: /BookOfVerse/en/
+          SITE_ALTERNATE_ZH: /BookOfVerse/zh/
+        run: ./scripts/build_local_site.ps1 -Python python
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site
 
   deploy:
     runs-on: ubuntu-latest

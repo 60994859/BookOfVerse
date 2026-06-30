@@ -12,7 +12,8 @@ Set-Location $Root
 function Assert-UnderRoot {
     param([string]$Path)
     $full = [System.IO.Path]::GetFullPath($Path)
-    $rootFull = [System.IO.Path]::GetFullPath($Root).TrimEnd('\') + '\'
+    $separator = [System.IO.Path]::DirectorySeparatorChar
+    $rootFull = [System.IO.Path]::GetFullPath($Root).TrimEnd('\', '/') + $separator
     if (-not $full.StartsWith($rootFull, [System.StringComparison]::OrdinalIgnoreCase)) {
         throw "Refusing to modify path outside workspace: $full"
     }
@@ -29,8 +30,9 @@ function Reset-Directory {
 
 function Copy-SharedAssets {
     param([string]$Destination)
+    $docsRoot = Join-Path $Root 'docs'
     foreach ($item in @('extra.css', 'images', 'js', 'Assets')) {
-        $source = Join-Path $Root "docs\$item"
+        $source = Join-Path $docsRoot $item
         if (Test-Path -LiteralPath $source) {
             Copy-Item -LiteralPath $source -Destination $Destination -Recurse -Force
         }
@@ -142,7 +144,8 @@ for translated in sorted(translated_dir.glob("*.md")):
 }
 
 if (-not $Python) {
-    $VenvPython = Join-Path $Root '.venv\Scripts\python.exe'
+    $venvExecutable = if ($env:OS -eq 'Windows_NT') { Join-Path 'Scripts' 'python.exe' } else { Join-Path 'bin' 'python' }
+    $VenvPython = Join-Path (Join-Path $Root '.venv') $venvExecutable
     if (-not (Test-Path -LiteralPath $VenvPython)) {
         $BootstrapPython = (Get-Command python -ErrorAction Stop).Source
         & $BootstrapPython -m venv (Join-Path $Root '.venv')
@@ -159,9 +162,10 @@ $ChineseStage = Join-Path $StageRoot 'zh'
 Reset-Directory $EnglishStage
 Reset-Directory $ChineseStage
 
-Get-ChildItem -LiteralPath (Join-Path $Root 'docs') -File -Filter '*.md' |
+$DocsRoot = Join-Path $Root 'docs'
+Get-ChildItem -LiteralPath $DocsRoot -File -Filter '*.md' |
     Copy-Item -Destination $EnglishStage
-Get-ChildItem -LiteralPath (Join-Path $Root 'docs\zh-llm') -File -Filter '*.md' |
+Get-ChildItem -LiteralPath (Join-Path $DocsRoot 'zh-llm') -File -Filter '*.md' |
     Copy-Item -Destination $ChineseStage
 Copy-SharedAssets $EnglishStage
 Copy-SharedAssets $ChineseStage
