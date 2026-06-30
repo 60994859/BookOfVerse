@@ -22,7 +22,48 @@ origin/main
 
 所以日常执行 `git push` 时，会默认上传到你自己的仓库，而不是官方仓库。
 
-## 2. 查看远端配置
+## 2. 是否会影响官方仓库
+
+正常操作不会影响官方仓库。
+
+下面这些命令只是从官方仓库读取更新：
+
+```powershell
+git fetch upstream
+git merge upstream/main
+```
+
+`git fetch upstream` 只下载官方更新；`git merge upstream/main` 只把已经下载的官方更新合并到你的本地分支。它们不会向官方仓库写入任何内容。
+
+下面这个命令会上传到你自己的仓库：
+
+```powershell
+git push
+```
+
+因为当前 `main` 分支跟踪的是 `origin/main`，所以 `git push` 等价于把当前分支推到：
+
+```text
+https://github.com/60994859/BookOfVerse.git
+```
+
+不要执行下面这个命令：
+
+```powershell
+git push upstream main
+```
+
+这条命令的含义是尝试把你的本地 `main` 分支推送到官方仓库。你通常没有官方仓库写权限，所以 GitHub 大概率会拒绝；但为了避免误操作，日常不要使用它。
+
+安全口诀：
+
+```text
+拉官方：git fetch upstream + git merge upstream/main
+推自己：git push
+不要推官方：不要 git push upstream main
+```
+
+## 3. 查看远端配置
 
 随时可以用下面命令确认：
 
@@ -51,7 +92,7 @@ git branch -vv
 [origin/main]
 ```
 
-## 3. 日常上传到自己的仓库
+## 4. 日常上传到自己的仓库
 
 修改文件后，按下面流程提交并上传：
 
@@ -76,7 +117,7 @@ https://github.com/60994859/BookOfVerse.git
 git push origin main
 ```
 
-## 4. 拉取官方最新更新
+## 5. 拉取官方最新更新
 
 要从官方仓库拉取最新内容，使用：
 
@@ -106,7 +147,7 @@ git push
 3. `git merge upstream/main` 把官方更新合并到本地 `main`。
 4. `git push` 把合并后的结果上传到你自己的 `origin/main`。
 
-## 5. 推荐的安全同步流程
+## 6. 推荐的安全同步流程
 
 每次同步官方更新前，建议先确认本地是干净的：
 
@@ -137,7 +178,7 @@ git commit -m "Save local changes before upstream sync"
 
 再同步官方更新。
 
-## 6. 如果出现冲突
+## 7. 如果出现冲突
 
 合并官方更新时，如果 Git 提示 conflict，说明官方改动和你的本地改动修改了同一位置。
 
@@ -167,7 +208,7 @@ git push
 
 注意：不要使用 `git reset --hard` 或 `git checkout -- <file>` 来处理冲突，除非你明确知道会丢弃哪些改动。
 
-## 7. 只查看官方更新，不合并
+## 8. 只查看官方更新，不合并
 
 如果只是想看看官方有哪些新提交：
 
@@ -194,7 +235,7 @@ git diff main..upstream/main
 git merge upstream/main
 ```
 
-## 8. 同步官方更新后的中文文档处理
+## 9. 同步官方更新后的中文文档处理
 
 官方更新通常只会改英文文档，例如：
 
@@ -243,7 +284,7 @@ tmp/
 node_modules/
 ```
 
-## 9. 代理问题
+## 10. 代理问题
 
 当前仓库曾经配置过本地代理：
 
@@ -273,7 +314,7 @@ git config --unset https.proxy
 
 如果你确实需要代理访问 GitHub，建议配置 Git 支持的 HTTP/HTTPS 代理，而不是在当前 Git Credential Manager 流程中使用 `socks5`。
 
-## 10. 常用命令速查
+## 11. 常用命令速查
 
 查看当前状态：
 
@@ -319,7 +360,7 @@ git remote -v
 git branch -vv
 ```
 
-## 11. 推荐工作习惯
+## 12. 推荐工作习惯
 
 1. 日常只对 `origin` push。
 2. 只从 `upstream` fetch/merge，不向 `upstream` push。
